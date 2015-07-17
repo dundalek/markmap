@@ -15,6 +15,9 @@ var diagonal = d3.svg.diagonal()
 var svg = d3.select("body").append("svg")
     .attr("width", width + margin.right + margin.left)
     .attr("height", height + margin.top + margin.bottom)
+    .call(d3.behavior.zoom().on("zoom", function () {
+      svg.attr("transform", "translate(" + d3.event.translate + ")" + " scale(" + d3.event.scale + ")")
+    }))
   .append("g")
     .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
@@ -33,7 +36,7 @@ d3.json("flare.json", function(error, flare) {
     }
   }
 
-  root.children.forEach(collapse);
+  //root.children.forEach(collapse);
   update(root);
 });
 
