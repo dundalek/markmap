@@ -1,0 +1,102 @@
+{
+  "name": "A General Theory of Reactivity",
+  "depth": 1,
+  "children": [{
+    "name": "Concepts",
+    "depth": 2,
+    "children": [{
+      "name": "Singular and temporal",
+      "depth": 3
+    }, {
+      "name": "Plural and temporal",
+      "depth": 3
+    }]
+  }, {
+    "name": "Primitives",
+    "depth": 2,
+    "children": [{
+      "name": "Iterators",
+      "depth": 3
+    }, {
+      "name": "Generator Functions",
+      "depth": 3
+    }, {
+      "name": "Generators",
+      "depth": 3
+    }, {
+      "name": "Asynchronous Values",
+      "depth": 3
+    }, {
+      "name": "Asynchronous Functions",
+      "depth": 3
+    }, {
+      "name": "Promise Queues",
+      "depth": 3
+    }, {
+      "name": "Semaphores",
+      "depth": 3
+    }, {
+      "name": "Promise Buffers",
+      "depth": 3
+    }, {
+      "name": "Promise Iterators",
+      "depth": 3,
+      "children": [{
+        "name": "map",
+        "depth": 4
+      }, {
+        "name": "forEach",
+        "depth": 4
+      }, {
+        "name": "reduce",
+        "depth": 4
+      }, {
+        "name": "pipe",
+        "depth": 4
+      }, {
+        "name": "buffer",
+        "depth": 4
+      }, {
+        "name": "read",
+        "depth": 4
+      }, {
+        "name": "Remote iterators",
+        "depth": 4
+      }]
+    }, {
+      "name": "Promise Generators",
+      "depth": 3
+    }, {
+      "name": "Asynchronous Generator Functions",
+      "depth": 3
+    }, {
+      "name": "Observables",
+      "depth": 3
+    }, {
+      "name": "Observables and Signals",
+      "depth": 3
+    }, {
+      "name": "Behaviors",
+      "depth": 3
+    }]
+  }, {
+    "name": "Cases",
+    "depth": 2,
+    "children": [{
+      "name": "Progress and estimated time to completion",
+      "depth": 3
+    }]
+  }, {
+    "name": "Summary",
+    "depth": 2
+  }, {
+    "name": "Further Work",
+    "depth": 2
+  }, {
+    "name": "Glossary",
+    "depth": 2
+  }, {
+    "name": "Acknowledgements",
+    "depth": 2
+  }]
+}
