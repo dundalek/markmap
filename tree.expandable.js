@@ -24,6 +24,8 @@ var svg = d3.select("body").append("svg")
 d3.json("gtor.json", function(error, flare) {
   if (error) throw error;
 
+  traverseHelperNodes(flare);
+
   root = flare;
   root.x0 = height / 2;
   root.y0 = 0;
@@ -40,6 +42,43 @@ d3.json("gtor.json", function(error, flare) {
   update(root);
 });
 
+function traverseHelperNodes(node) {
+  var children = node.children;
+  if (children && children.length > 0) {
+    var tmp = {
+      name: '',
+      children: children
+    };
+    node.children = [tmp];
+  } else {
+    node.children = [{
+      name: ''
+    }];
+  }
+  if (children) {
+    children.forEach(traverseHelperNodes);
+  }
+}
+
+function getLabelWidth(d) {
+  // constant ratio for now, needs to be measured based on font
+  return d.name.length * 5;
+}
+
+function traverseLabelWidth(d, offset) {
+  d.y += offset;
+  if (d.name !== '' && d.children && d.children.length === 1 && d.children[0].name === '') {
+    var child = d.children[0];
+    offset += d.y + getLabelWidth(d) - child.y;
+    child.y += offset;
+    if (child.children) {
+      child.children.forEach(function(c) {
+        traverseLabelWidth(c, offset);
+      });
+    }
+  }
+}
+
 d3.select(self.frameElement).style("height", "800px");
 
 function update(source) {
@@ -49,7 +88,9 @@ function update(source) {
       links = tree.links(nodes);
 
   // Normalize for fixed-depth.
-  nodes.forEach(function(d) { d.y = d.depth * 180; });
+  //nodes.forEach(function(d) { d.y = d.depth * 180; });
+  
+  traverseLabelWidth(root, 0);
 
   // Update the nodes…
   var node = svg.selectAll("g.node")
@@ -66,9 +107,9 @@ function update(source) {
       .style("fill", function(d) { return d._children ? "lightsteelblue" : "#fff"; });
 
   nodeEnter.append("text")
-      .attr("x", function(d) { return d.children || d._children ? -10 : 10; })
-      .attr("dy", ".35em")
-      .attr("text-anchor", function(d) { return d.children || d._children ? "end" : "start"; })
+      .attr("x", function(d) { return  10; })
+      .attr("dy", "-0.5em")
+      .attr("text-anchor", function(d) { return "start"; })
       .text(function(d) { return d.name; })
       .style("fill-opacity", 1e-6);
 
@@ -79,7 +120,12 @@ function update(source) {
 
   nodeUpdate.select("circle")
       .attr("r", 4.5)
-      .style("fill", function(d) { return d._children ? "lightsteelblue" : "#fff"; });
+      .style("fill", function(d) {
+         return d._children ? "lightsteelblue" : "#fff"
+      })
+      .style('display', function(d) {
+        return d.name !== '' && d.children && d.children.length === 1 && d.children[0].name === '' ? 'none' : 'inline';
+      });
 
   nodeUpdate.select("text")
       .style("fill-opacity", 1);
