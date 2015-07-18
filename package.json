@@ -20,6 +20,6 @@
   "license": "MIT",
   "dependencies": {
     "d3": "^3.5.6",
-    "marked": "^0.3.3"
+    "remarkable": "^1.6.0"
   }
 }
