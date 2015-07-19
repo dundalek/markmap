@@ -165,6 +165,14 @@ function update(source) {
   link.enter().insert("path", "g")
       .attr("class", "link")
       .attr('stroke', function(d) { return color(d.target.branch); })
+      .attr('stroke-width', function(l) {
+        var d = l.target;
+        var depth = d.depth;
+        if (d.name !== '' && d.children && d.children.length === 1 && d.children[0].name === '') {
+          depth += 1;
+        }
+        return Math.max(8 - depth, 1.5);
+      })
       .attr("d", function(d) {
         var o = {x: source.x0, y: source.y0};
         return diagonal({source: o, target: o});
