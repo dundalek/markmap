@@ -9,6 +9,8 @@ var i = 0,
 var tree = d3.layout.tree()
     .size([height, width]);
 
+var color = d3.scale.category20();
+
 var diagonal = d3.svg.diagonal()
     .projection(function(d) { return [d.y, d.x]; });
 
@@ -25,6 +27,9 @@ d3.json("gtor.json", function(error, flare) {
   if (error) throw error;
 
   traverseHelperNodes(flare);
+  flare.children[0].children.forEach(function(d, i) {
+    traverseBranchId(d, i);
+  });
 
   root = flare;
   root.x0 = height / 2;
@@ -79,6 +84,15 @@ function traverseLabelWidth(d, offset) {
   }
 }
 
+function traverseBranchId(node, branch) {
+  node.branch = branch;
+  if (node.children) {
+    node.children.forEach(function(d) {
+      traverseBranchId(d, branch);
+    })
+  }
+}
+
 d3.select(self.frameElement).style("height", "800px");
 
 function update(source) {
@@ -90,7 +104,7 @@ function update(source) {
   // Normalize for fixed-depth.
   //nodes.forEach(function(d) { d.y = d.depth * 180; });
   
-  traverseLabelWidth(root, 0);
+  //traverseLabelWidth(root, 0);
 
   // Update the nodes…
   var node = svg.selectAll("g.node")
@@ -103,8 +117,9 @@ function update(source) {
       .on("click", click);
 
   nodeEnter.append("circle")
+      .attr('stroke', function(d) { return color(d.branch); })
       .attr("r", 1e-6)
-      .style("fill", function(d) { return d._children ? "lightsteelblue" : "#fff"; });
+      .style("fill", function(d) { return d._children ? color(d.branch) : "#fff"; });
 
   nodeEnter.append("text")
       .attr("x", function(d) { return  10; })
@@ -121,7 +136,7 @@ function update(source) {
   nodeUpdate.select("circle")
       .attr("r", 4.5)
       .style("fill", function(d) {
-         return d._children ? "lightsteelblue" : "#fff"
+         return d._children ? color(d.branch) : "#fff"
       })
       .style('display', function(d) {
         return d.name !== '' && d.children && d.children.length === 1 && d.children[0].name === '' ? 'none' : 'inline';
@@ -149,6 +164,7 @@ function update(source) {
   // Enter any new links at the parent's previous position.
   link.enter().insert("path", "g")
       .attr("class", "link")
+      .attr('stroke', function(d) { return color(d.target.branch); })
       .attr("d", function(d) {
         var o = {x: source.x0, y: source.y0};
         return diagonal({source: o, target: o});
