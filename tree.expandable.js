@@ -139,7 +139,9 @@ function update(source) {
          return d._children ? color(d.branch) : "#fff"
       })
       .style('display', function(d) {
-        return d.name !== '' && d.children && d.children.length === 1 && d.children[0].name === '' ? 'none' : 'inline';
+        var isLabelNode = d.name !== '' && d.children && d.children.length === 1 && d.children[0].name === '';
+        var hasChildren = d.children || d._children;
+        return isLabelNode || !hasChildren ? 'none' : 'inline';
       });
 
   nodeUpdate.select("text")
