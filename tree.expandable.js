@@ -201,6 +201,9 @@ function update(source) {
 
 // Toggle children on click.
 function click(d) {
+  if (d.name !== '' && d.children && d.children.length === 1 && d.children[0].name === '') {
+    d = d.children[0];
+  }
   if (d.children) {
     d._children = d.children;
     d.children = null;
