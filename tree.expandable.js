@@ -53,6 +53,17 @@ root.y0 = 0;
 
 update(root);
 
+function traverseMinDistance(node) {
+  var val = Infinity;
+  if (node.children) {
+    val = Math.min.apply(null, node.children.map(traverseMinDistance));
+    if (node.children.length > 1) {
+      val = Math.min(val, Math.abs(node.children[0].x - node.children[1].x));
+    }
+  }
+  return val;
+}
+
 function traverseHelperNodes(node) {
   var children = node.children;
   if (children && children.length > 0) {
@@ -101,13 +112,21 @@ function traverseBranchId(node, branch) {
 
 function update(source) {
 
+  var offset = root.x !== undefined ? root.x : root.x0;
+
   // Compute the new tree layout.
   var nodes = tree.nodes(root).reverse(),
       links = tree.links(nodes);
 
-  // Normalize for fixed-depth.
-  //nodes.forEach(function(d) { d.y = d.depth * 180; });
-  
+  // Normalize
+  var ratio = 20 / traverseMinDistance(root);
+  offset -= root.x * ratio;
+
+  nodes.forEach(function(d) {
+    d.y = d.depth * 180;
+    d.x = d.x * ratio + offset;
+  });
+
   //traverseLabelWidth(root, 0);
 
   // Update the nodes…
