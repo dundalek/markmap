@@ -1,6 +1,17 @@
-var margin = {top: 20, right: 120, bottom: 20, left: 120},
-    width = 960 - margin.right - margin.left,
-    height = 800 - margin.top - margin.bottom;
+
+d3.json("flare.json", function(error, data) {
+  if (error) throw error;
+
+  init(d3.select("body"), data, {
+    width: document.body.scrollWidth,
+    height: document.body.scrollHeight
+  });
+});
+
+function init(el, data, options) {
+
+var height = options.height;
+var width = options.width;
 
 var i = 0,
     duration = 750,
@@ -14,38 +25,33 @@ var color = d3.scale.category20();
 var diagonal = d3.svg.diagonal()
     .projection(function(d) { return [d.y, d.x]; });
 
-var svg = d3.select("body").append("svg")
-    .attr("width", width + margin.right + margin.left)
-    .attr("height", height + margin.top + margin.bottom)
+var svg = el.append("svg")
+    .attr("width", width)
+    .attr("height", height)
     .call(d3.behavior.zoom().on("zoom", function () {
       svg.attr("transform", "translate(" + d3.event.translate + ")" + " scale(" + d3.event.scale + ")")
     }))
-  .append("g")
-    .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+    .append("g");
 
-d3.json("gtor.json", function(error, flare) {
-  if (error) throw error;
-
-  traverseHelperNodes(flare);
-  flare.children[0].children.forEach(function(d, i) {
-    traverseBranchId(d, i);
-  });
-
-  root = flare;
-  root.x0 = height / 2;
-  root.y0 = 0;
-
-  function collapse(d) {
-    if (d.children) {
-      d._children = d.children;
-      d._children.forEach(collapse);
-      d.children = null;
-    }
-  }
-
-  //root.children.forEach(collapse);
-  update(root);
+traverseHelperNodes(data);
+data.children[0].children.forEach(function(d, i) {
+  traverseBranchId(d, i);
 });
+
+root = data;
+root.x0 = height / 2;
+root.y0 = 0;
+
+// function collapse(d) {
+//   if (d.children) {
+//     d._children = d.children;
+//     d._children.forEach(collapse);
+//     d.children = null;
+//   }
+// }
+//root.children.forEach(collapse);
+
+update(root);
 
 function traverseHelperNodes(node) {
   var children = node.children;
@@ -89,11 +95,9 @@ function traverseBranchId(node, branch) {
   if (node.children) {
     node.children.forEach(function(d) {
       traverseBranchId(d, branch);
-    })
+    });
   }
 }
-
-d3.select(self.frameElement).style("height", "800px");
 
 function update(source) {
 
@@ -214,4 +218,6 @@ function click(d) {
     d._children = null;
   }
   update(d);
+}
+
 }
