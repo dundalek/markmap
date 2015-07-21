@@ -1,14 +1,19 @@
+(function (root, factory) {
+    if (typeof define === 'function' && define.amd) {
+        // AMD. Register as an anonymous module.
+        define(['d3'], factory);
+    } else if (typeof exports === 'object') {
+        // Node. Does not work with strict CommonJS, but
+        // only CommonJS-like environments that support module.exports,
+        // like Node.
+        module.exports = factory(require('d3'));
+    } else {
+        // Browser globals (root is window)
+        root.markmap = factory(root.d3);
+    }
+}(this, function (d3) {
 
-d3.json("flare.json", function(error, data) {
-  if (error) throw error;
-
-  init(d3.select("body"), data, {
-    width: document.body.scrollWidth,
-    height: document.body.scrollHeight
-  });
-});
-
-function init(el, data, options) {
+return function init(el, data, options) {
 
 var height = options.height;
 var width = options.width;
@@ -240,3 +245,5 @@ function click(d) {
 }
 
 }
+ 
+}));
