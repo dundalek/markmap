@@ -15,8 +15,8 @@
 
 return function init(el, data, options) {
 
-var height = options.height;
-var width = options.width;
+var height = el.node().offsetHeight;
+var width = el.node().offsetWidth;
 
 var i = 0,
     duration = 750,
@@ -31,8 +31,8 @@ var diagonal = d3.svg.diagonal()
     .projection(function(d) { return [d.y, d.x]; });
 
 var svg = el.append("svg")
-    .attr("width", width)
-    .attr("height", height)
+    .attr("width", "100%")
+    .attr("height", "100%")
     .call(d3.behavior.zoom().on("zoom", function () {
       svg.attr("transform", "translate(" + d3.event.translate + ")" + " scale(" + d3.event.scale + ")")
     }))
