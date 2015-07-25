@@ -1,11 +1,8 @@
+module.exports = function parseMarkdown(text) {
 
-var marked = require('marked');
-var fs = require('fs');
-var _ = require('lodash');
-
-var options = {};
-var text = fs.readFileSync('gtor.md', 'utf-8');
-
+// var marked = require('marked');
+// var _ = require('lodash');
+// var options = {};
 // var tokens = marked.lexer(text, options);
 // var headings = _.filter(tokens, 'type', 'heading');
 
@@ -62,5 +59,5 @@ if (root.children.length === 1) {
   root = root.children[0];
 }
 
-console.log(root);
-//fs.writeFileSync('gtor.json', JSON.stringify(root));
+return root;
+};
