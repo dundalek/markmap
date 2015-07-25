@@ -1,0 +1,16 @@
+.markmap .node {
+  cursor: pointer;
+}
+
+.markmap .node circle {
+  fill: #fff;
+  stroke-width: 1.5px;
+}
+
+.markmap .node text {
+  font: 10px sans-serif;
+}
+
+.markmap .link {
+  fill: none;
+}

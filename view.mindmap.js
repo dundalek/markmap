@@ -33,6 +33,7 @@ var diagonal = d3.svg.diagonal()
 var svg = el.append("svg")
     .attr("width", "100%")
     .attr("height", "100%")
+    .attr('class', 'markmap')
     .call(d3.behavior.zoom().on("zoom", function () {
       svg.attr("transform", "translate(" + d3.event.translate + ")" + " scale(" + d3.event.scale + ")")
     }))
