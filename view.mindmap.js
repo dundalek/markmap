@@ -30,14 +30,30 @@ var color = d3.scale.category20();
 var diagonal = d3.svg.diagonal()
     .projection(function(d) { return [d.y, d.x]; });
 
+var zoomScale = 0.5;
+var zoomTranslate = [0, 0];
+
+function updateZoom() {
+  svg.attr("transform", "translate(" + zoomTranslate + ")" + " scale(" + zoomScale + ")")
+}
+
+var zoom = d3.behavior.zoom()
+   .translate(zoomTranslate)
+   .scale(zoomScale)
+   .on("zoom", function() {
+     zoomTranslate = d3.event.translate;
+     zoomScale = d3.event.scale;
+     updateZoom();
+   });
+
 var svg = el.append("svg")
     .attr("width", "100%")
     .attr("height", "100%")
     .attr('class', 'markmap')
-    .call(d3.behavior.zoom().on("zoom", function () {
-      svg.attr("transform", "translate(" + d3.event.translate + ")" + " scale(" + d3.event.scale + ")")
-    }))
+    .call(zoom)
     .append("g");
+
+updateZoom();
 
 traverseHelperNodes(data);
 data.children[0].children.forEach(function(d, i) {
@@ -57,7 +73,7 @@ root.y0 = 0;
 // }
 //root.children.forEach(collapse);
 
-update(root);
+update(root, true);
 
 function traverseMinDistance(node) {
   var val = Infinity;
@@ -116,7 +132,7 @@ function traverseBranchId(node, branch) {
   }
 }
 
-function update(source) {
+function update(source, autoFit) {
 
   var offset = root.x !== undefined ? root.x : root.x0;
 
@@ -132,6 +148,20 @@ function update(source) {
     d.y = d.depth * 180;
     d.x = d.x * ratio + offset;
   });
+
+  if (autoFit) {
+    var minX = d3.min(nodes, function(d) {return d.x;});
+    var minY = d3.min(nodes, function(d) {return d.y;});
+    var maxX = d3.max(nodes, function(d) {return d.x;});
+    var maxY = d3.max(nodes, function(d) {return d.y;});
+    var realHeight = maxX - minX;
+    var realWidth = maxY - minY;
+    var scale = Math.min(height / realHeight, width / realWidth, 1);
+    zoomScale = scale;
+    zoomTranslate = [(width-realWidth*scale)/2-minY*scale, (height-realHeight*scale)/2-minX*scale];
+    zoom.translate(zoomTranslate).scale(zoomScale);
+    updateZoom();
+  }
 
   //traverseLabelWidth(root, 0);
 
