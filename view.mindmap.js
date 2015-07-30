@@ -13,55 +13,63 @@
     }
 }(this, function (d3) {
 
-return function init(el, data, options) {
+var layouts = {
+  tree: function() {
+    return d3.layout.tree();
+  }
+};
 
-var height = el.node().offsetHeight;
-var width = el.node().offsetWidth;
+var linkShapes = {
+  diagonal: function() {
+    return d3.svg.diagonal()
+      .projection(function(d) { return [d.y, d.x]; });
+  }
+};
 
-var i = 0,
-    duration = 750,
-    root;
+return function init(svg, data, options) {
 
-var tree = d3.layout.tree()
-    .size([height, width]);
+svg = svg.datum ? svg : d3.select(svg);
 
-var color = d3.scale.category20();
+var i = 0;
+var state = {};
 
-var diagonal = d3.svg.diagonal()
-    .projection(function(d) { return [d.y, d.x]; });
+state.height = svg.node().offsetHeight;
+state.width = svg.node().offsetWidth;
+state.autoFit = true;
+state.duration = 750;
+state.zoomScale = 1;
+state.zoomTranslate = [0, 0];
+state.color = d3.scale['category20']();
+state.layout = layouts['tree']().size([state.height, state.width]);
+state.linkShape = linkShapes['diagonal']();
 
-var zoomScale = 0.5;
-var zoomTranslate = [0, 0];
-
-function updateZoom() {
-  svg.attr("transform", "translate(" + zoomTranslate + ")" + " scale(" + zoomScale + ")")
+function updateZoom(translate, scale) {
+  state.zoomTranslate = translate;
+  state.zoomScale = scale;
+  zoom.translate(state.zoomTranslate)
+      .scale(state.zoomScale);
+  svg.attr("transform", "translate(" + state.zoomTranslate + ")" + " scale(" + state.zoomScale + ")")
 }
 
 var zoom = d3.behavior.zoom()
-   .translate(zoomTranslate)
-   .scale(zoomScale)
    .on("zoom", function() {
-     zoomTranslate = d3.event.translate;
-     zoomScale = d3.event.scale;
-     updateZoom();
+     updateZoom(d3.event.translate, d3.event.scale);
    });
 
-var svg = el.append("svg")
-    .attr("width", "100%")
-    .attr("height", "100%")
-    .call(zoom)
-    .append("g");
+svg = svg
+  .call(zoom)
+  .append("g");
 
-updateZoom();
+updateZoom(state.zoomTranslate, state.zoomScale);
 
 traverseHelperNodes(data);
 data.children[0].children.forEach(function(d, i) {
   traverseBranchId(d, i);
 });
 
-root = data;
-root.x0 = height / 2;
-root.y0 = 0;
+state.root = data;
+state.root.x0 = state.height / 2;
+state.root.y0 = 0;
 
 // function collapse(d) {
 //   if (d.children) {
@@ -72,7 +80,7 @@ root.y0 = 0;
 // }
 //root.children.forEach(collapse);
 
-update(root, true);
+update(state.root);
 
 function traverseMinDistance(node) {
   var val = Infinity;
@@ -131,35 +139,33 @@ function traverseBranchId(node, branch) {
   }
 }
 
-function update(source, autoFit) {
+function update(source) {
 
-  var offset = root.x !== undefined ? root.x : root.x0;
+  var offset = state.root.x !== undefined ? state.root.x : state.root.x0;
 
   // Compute the new tree layout.
-  var nodes = tree.nodes(root).reverse(),
-      links = tree.links(nodes);
+  var nodes = state.layout.nodes(state.root).reverse(),
+      links = state.layout.links(nodes);
 
   // Normalize
-  var ratio = 20 / traverseMinDistance(root);
-  offset -= root.x * ratio;
+  var ratio = 20 / traverseMinDistance(state.root);
+  offset -= state.root.x * ratio;
 
   nodes.forEach(function(d) {
     d.y = d.depth * 180;
     d.x = d.x * ratio + offset;
   });
 
-  if (autoFit) {
+  if (state.autoFit) {
     var minX = d3.min(nodes, function(d) {return d.x;});
     var minY = d3.min(nodes, function(d) {return d.y;});
     var maxX = d3.max(nodes, function(d) {return d.x;});
     var maxY = d3.max(nodes, function(d) {return d.y;});
     var realHeight = maxX - minX;
     var realWidth = maxY - minY;
-    var scale = Math.min(height / realHeight, width / realWidth, 1);
-    zoomScale = scale;
-    zoomTranslate = [(width-realWidth*scale)/2-minY*scale, (height-realHeight*scale)/2-minX*scale];
-    zoom.translate(zoomTranslate).scale(zoomScale);
-    updateZoom();
+    var scale = Math.min(state.height / realHeight, state.width / realWidth, 1);
+    var translate = [(state.width-realWidth*scale)/2-minY*scale, (state.height-realHeight*scale)/2-minX*scale];
+    updateZoom(translate, scale);
   }
 
   //traverseLabelWidth(root, 0);
@@ -176,9 +182,9 @@ function update(source, autoFit) {
 
   nodeEnter.append("circle")
       .attr('class', 'markmap-node-circle')
-      .attr('stroke', function(d) { return color(d.branch); })
+      .attr('stroke', function(d) { return state.color(d.branch); })
       .attr("r", 1e-6)
-      .style("fill", function(d) { return d._children ? color(d.branch) : "#fff"; });
+      .style("fill", function(d) { return d._children ? state.color(d.branch) : "#fff"; });
 
   nodeEnter.append("text")
       .attr('class', 'markmap-node-text')
@@ -190,13 +196,13 @@ function update(source, autoFit) {
 
   // Transition nodes to their new position.
   var nodeUpdate = node.transition()
-      .duration(duration)
+      .duration(state.duration)
       .attr("transform", function(d) { return "translate(" + d.y + "," + d.x + ")"; });
 
   nodeUpdate.select("circle")
       .attr("r", 4.5)
       .style("fill", function(d) {
-         return d._children ? color(d.branch) : "#fff"
+         return d._children ? state.color(d.branch) : "#fff"
       })
       .style('display', function(d) {
         var isLabelNode = d.name !== '' && d.children && d.children.length === 1 && d.children[0].name === '';
@@ -209,7 +215,7 @@ function update(source, autoFit) {
 
   // Transition exiting nodes to the parent's new position.
   var nodeExit = node.exit().transition()
-      .duration(duration)
+      .duration(state.duration)
       .attr("transform", function(d) { return "translate(" + source.y + "," + source.x + ")"; })
       .remove();
 
@@ -226,7 +232,7 @@ function update(source, autoFit) {
   // Enter any new links at the parent's previous position.
   link.enter().insert("path", "g")
       .attr("class", "markmap-link")
-      .attr('stroke', function(d) { return color(d.target.branch); })
+      .attr('stroke', function(d) { return state.color(d.target.branch); })
       .attr('stroke-width', function(l) {
         var d = l.target;
         var depth = d.depth;
@@ -237,20 +243,20 @@ function update(source, autoFit) {
       })
       .attr("d", function(d) {
         var o = {x: source.x0, y: source.y0};
-        return diagonal({source: o, target: o});
+        return state.linkShape({source: o, target: o});
       });
 
   // Transition links to their new position.
   link.transition()
-      .duration(duration)
-      .attr("d", diagonal);
+      .duration(state.duration)
+      .attr("d", state.linkShape);
 
   // Transition exiting nodes to the parent's new position.
   link.exit().transition()
-      .duration(duration)
+      .duration(state.duration)
       .attr("d", function(d) {
         var o = {x: source.x, y: source.y};
-        return diagonal({source: o, target: o});
+        return state.linkShape({source: o, target: o});
       })
       .remove();
 
