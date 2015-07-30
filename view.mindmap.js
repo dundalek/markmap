@@ -49,7 +49,6 @@ var zoom = d3.behavior.zoom()
 var svg = el.append("svg")
     .attr("width", "100%")
     .attr("height", "100%")
-    .attr('class', 'markmap')
     .call(zoom)
     .append("g");
 
@@ -166,21 +165,23 @@ function update(source, autoFit) {
   //traverseLabelWidth(root, 0);
 
   // Update the nodes…
-  var node = svg.selectAll("g.node")
+  var node = svg.selectAll("g.markmap-node")
       .data(nodes, function(d) { return d.id || (d.id = ++i); });
 
   // Enter any new nodes at the parent's previous position.
   var nodeEnter = node.enter().append("g")
-      .attr("class", "node")
+      .attr("class", "markmap-node")
       .attr("transform", function(d) { return "translate(" + source.y0 + "," + source.x0 + ")"; })
       .on("click", click);
 
   nodeEnter.append("circle")
+      .attr('class', 'markmap-node-circle')
       .attr('stroke', function(d) { return color(d.branch); })
       .attr("r", 1e-6)
       .style("fill", function(d) { return d._children ? color(d.branch) : "#fff"; });
 
   nodeEnter.append("text")
+      .attr('class', 'markmap-node-text')
       .attr("x", function(d) { return  10; })
       .attr("dy", "-0.5em")
       .attr("text-anchor", function(d) { return "start"; })
@@ -219,12 +220,12 @@ function update(source, autoFit) {
       .style("fill-opacity", 1e-6);
 
   // Update the links…
-  var link = svg.selectAll("path.link")
+  var link = svg.selectAll("path.markmap-link")
       .data(links, function(d) { return d.target.id; });
 
   // Enter any new links at the parent's previous position.
   link.enter().insert("path", "g")
-      .attr("class", "link")
+      .attr("class", "markmap-link")
       .attr('stroke', function(d) { return color(d.target.branch); })
       .attr('stroke-width', function(l) {
         var d = l.target;
