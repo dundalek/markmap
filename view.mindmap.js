@@ -151,9 +151,11 @@ assign(Markmap.prototype, {
   },
   setData: function(data) {
     traverseHelperNodes(data);
-    data.children[0].children.forEach(function(d, i) {
-      traverseBranchId(d, i);
-    });
+    if (data.children && data.children[0] && data.children[0].children) {
+      data.children[0].children.forEach(function(d, i) {
+        traverseBranchId(d, i);
+      });
+    }
 
     var state = this.state;
     state.root = data;
