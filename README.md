@@ -1,7 +1,7 @@
 
 # markmap
 
-*Markmap* is a javascript component that will visualize your markdown documents as mindmaps. It is useful for better navigation and overview of the content. You can see it in action online [here](http://kb.knomaton.org/multiagent-systems/). It is also used in an [extension](https://packages.atom.io/markdown-mindmap) for Atom editor.
+*Markmap* is a javascript component that will visualize your markdown documents as mindmaps. It is useful for better navigation and overview of the content. You can see it in action online [here](http://kb.knomaton.org/multi-agent-systems/). It is also used in an [extension](https://atom.io/packages/markdown-mindmap) for Atom editor.
 
 Install the component with NPM.
 ```
