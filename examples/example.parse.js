@@ -1,6 +1,6 @@
 
 var fs = require('fs');
-var parse = require('./parse.markdown');
+var parse = require('../parse.markdown');
 
 var text = fs.readFileSync('gtor.md', 'utf-8');
 
