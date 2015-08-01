@@ -96,6 +96,7 @@ assign(Markmap.prototype, {
       linkShape: 'diagonal'
     };
   },
+  helperNames: ['layout', 'linkShape', 'color'],
   layouts: {
     tree: function() {
       return d3.layout.tree();
@@ -113,8 +114,10 @@ assign(Markmap.prototype, {
 
     svg = svg.datum ? svg : d3.select(svg);
 
+    this.helpers = {};
     this.i = 0;
-    var state = this.state = this.defaults();
+    var state = this.state = {};
+    this.set(this.defaults());
     state.height = svg.node().offsetHeight;
     state.width = svg.node().offsetWidth;
     this.set(options);
@@ -147,10 +150,13 @@ assign(Markmap.prototype, {
   },
   set: function(values) {
     var state = this.state;
+    var helpers = this.helpers;
+    this.helperNames.forEach(function(h) {
+      if (!helpers[h] || (values[h] && values[h] !== state[h])) {
+        helpers[h] = this[h+'s'][values[h] || state[h]]();
+      }
+    }.bind(this));
     assign(state, values || {});
-    this.color = this.colors[state.color]();
-    this.linkShape = this.linkShapes[state.linkShape]();
-    this.currentLayout = this.layouts[state.layout]().size([state.height, state.width]);
     return this;
   },
   setData: function(data) {
@@ -184,7 +190,7 @@ assign(Markmap.prototype, {
   },
   layout: function(source) {
     var state = this.state;
-    var layout = this.currentLayout;
+    var layout = this.helpers.layout;
 
     var offset = state.root.x !== undefined ? state.root.x : state.root.x0;
 
@@ -223,8 +229,8 @@ assign(Markmap.prototype, {
   render: function(source, nodes, links) {
     var svg = this.svg;
     var state = this.state;
-    var color = this.color;
-    var linkShape = this.linkShape;
+    var color = this.helpers.color;
+    var linkShape = this.helpers.linkShape;
     
     // Update the nodes…
     var node = svg.selectAll("g.markmap-node")
