@@ -146,7 +146,11 @@ assign(Markmap.prototype, {
     this.svg.attr("transform", "translate(" + state.zoomTranslate + ")" + " scale(" + state.zoomScale + ")")
   },
   set: function(values) {
-    assign(this.state, values || {});
+    var state = this.state;
+    assign(state, values || {});
+    this.color = this.colors[state.color]();
+    this.linkShape = this.linkShapes[state.linkShape]();
+    this.currentLayout = this.layouts[state.layout]().size([state.height, state.width]);
     return this;
   },
   setData: function(data) {
@@ -180,7 +184,7 @@ assign(Markmap.prototype, {
   },
   layout: function(source) {
     var state = this.state;
-    var layout = this.layouts[state.layout]().size([state.height, state.width]);
+    var layout = this.currentLayout;
 
     var offset = state.root.x !== undefined ? state.root.x : state.root.x0;
 
@@ -219,8 +223,8 @@ assign(Markmap.prototype, {
   render: function(source, nodes, links) {
     var svg = this.svg;
     var state = this.state;
-    var color = this.colors[state.color]();
-    var linkShape = this.linkShapes[state.linkShape]();
+    var color = this.color;
+    var linkShape = this.linkShape;
     
     // Update the nodes…
     var node = svg.selectAll("g.markmap-node")
