@@ -1,134 +1,134 @@
 {
   "depth": 1,
-  "lines": [1, 2],
+  "line": 1,
   "name": "A General Theory of Reactivity",
   "children": [{
     "depth": 2,
-    "lines": [45, 46],
+    "line": 45,
     "name": "Concepts",
     "children": [{
       "depth": 3,
-      "lines": [101, 102],
+      "line": 101,
       "name": "Singular and temporal"
     }, {
       "depth": 3,
-      "lines": [151, 152],
+      "line": 151,
       "name": "Plural and temporal"
     }]
   }, {
     "depth": 2,
-    "lines": [237, 238],
+    "line": 237,
     "name": "Primitives",
     "children": [{
       "depth": 3,
-      "lines": [244, 245],
+      "line": 244,
       "name": "Iterators"
     }, {
       "depth": 3,
-      "lines": [363, 364],
+      "line": 363,
       "name": "Generator Functions"
     }, {
       "depth": 3,
-      "lines": [475, 476],
+      "line": 475,
       "name": "Generators"
     }, {
       "depth": 3,
-      "lines": [505, 506],
+      "line": 505,
       "name": "Asynchronous Values"
     }, {
       "depth": 3,
-      "lines": [653, 654],
+      "line": 653,
       "name": "Asynchronous Functions"
     }, {
       "depth": 3,
-      "lines": [748, 749],
+      "line": 748,
       "name": "Promise Queues"
     }, {
       "depth": 3,
-      "lines": [851, 852],
+      "line": 851,
       "name": "Semaphores"
     }, {
       "depth": 3,
-      "lines": [897, 898],
+      "line": 897,
       "name": "Promise Buffers"
     }, {
       "depth": 3,
-      "lines": [1013, 1014],
+      "line": 1013,
       "name": "Promise Iterators",
       "children": [{
         "depth": 4,
-        "lines": [1056, 1057],
+        "line": 1056,
         "name": "map"
       }, {
         "depth": 4,
-        "lines": [1076, 1077],
+        "line": 1076,
         "name": "forEach"
       }, {
         "depth": 4,
-        "lines": [1119, 1120],
+        "line": 1119,
         "name": "reduce"
       }, {
         "depth": 4,
-        "lines": [1135, 1136],
+        "line": 1135,
         "name": "pipe"
       }, {
         "depth": 4,
-        "lines": [1151, 1152],
+        "line": 1151,
         "name": "buffer"
       }, {
         "depth": 4,
-        "lines": [1159, 1160],
+        "line": 1159,
         "name": "read"
       }, {
         "depth": 4,
-        "lines": [1169, 1170],
+        "line": 1169,
         "name": "Remote iterators"
       }]
     }, {
       "depth": 3,
-      "lines": [1194, 1195],
+      "line": 1194,
       "name": "Promise Generators"
     }, {
       "depth": 3,
-      "lines": [1232, 1233],
+      "line": 1232,
       "name": "Asynchronous Generator Functions"
     }, {
       "depth": 3,
-      "lines": [1413, 1414],
+      "line": 1413,
       "name": "Observables"
     }, {
       "depth": 3,
-      "lines": [1490, 1491],
+      "line": 1490,
       "name": "Observables and Signals"
     }, {
       "depth": 3,
-      "lines": [1561, 1562],
+      "line": 1561,
       "name": "Behaviors"
     }]
   }, {
     "depth": 2,
-    "lines": [1579, 1580],
+    "line": 1579,
     "name": "Cases",
     "children": [{
       "depth": 3,
-      "lines": [1581, 1582],
+      "line": 1581,
       "name": "Progress and estimated time to completion"
     }]
   }, {
     "depth": 2,
-    "lines": [1635, 1636],
+    "line": 1635,
     "name": "Summary"
   }, {
     "depth": 2,
-    "lines": [1665, 1666],
+    "line": 1665,
     "name": "Further Work"
   }, {
     "depth": 2,
-    "lines": [1745, 1746],
+    "line": 1745,
     "name": "Glossary"
   }, {
     "depth": 2,
-    "lines": [1803, 1804],
+    "line": 1803,
     "name": "Acknowledgements"
   }]
 }
