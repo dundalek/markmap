@@ -5,7 +5,7 @@ module.exports = function transformHeadings(headings) {
     children: []
   };
   var node = root;
-  var stack = [root];
+  var stack = [];
   var tmp;
 
   headings.forEach(function(h) {
@@ -23,8 +23,8 @@ module.exports = function transformHeadings(headings) {
         node.children = node.children || [];
         node.children.push(tmp);
       }
-      node = node.children[node.children.length-1];
       stack.push(node);
+      node = node.children[node.children.length-1];
     }
 
     node.children = node.children || [];
