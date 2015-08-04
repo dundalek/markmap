@@ -106,6 +106,12 @@ assign(Markmap.prototype, {
     diagonal: function() {
       return d3.svg.diagonal()
         .projection(function(d) { return [d.y, d.x]; });
+    },
+    bracket: function() {
+      return function(d) {
+        return "M" + d.source.y + "," + d.source.x
+            + "V" + d.target.x + "H" + d.target.y;
+      };
     }
   },
   colors: d3.scale,
