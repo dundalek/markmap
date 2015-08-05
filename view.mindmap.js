@@ -70,10 +70,10 @@ assign(Markmap.prototype, {
   defaults: function() {
     return {
       autoFit: true,
-      nodeHeight: 10,
+      nodeHeight: 20,
       nodeWidth: 180,
       spacingVertical: 10,
-      spacingHorizontal: 180,
+      spacingHorizontal: 120,
       duration: 750,
       zoomScale: 1,
       zoomTranslate: [0, 0],
@@ -218,6 +218,31 @@ assign(Markmap.prototype, {
     };
   },
   render: function(source, nodes, links) {
+    var svg = this.svg;
+    var state = this.state;
+    var color = this.helpers.color = function() {
+      return '#929292';
+    };
+    this.renderBasic(source, nodes, links);
+    var node = svg.selectAll("g.markmap-node");
+
+    node.selectAll('rect')
+      .attr("y", -state.nodeHeight/2)
+      .attr('rx', 10)
+      .attr('ry', 10)
+      .attr('height', state.nodeHeight)
+      .attr('fill', '#E0E0E0')
+      .attr('stroke', color)
+      .attr('stroke-width', 1);
+    
+    node.selectAll('text')
+     .attr("dy", ".3em")
+      
+    svg.selectAll("path.markmap-link")
+      .attr('stroke', color)
+      .attr('stroke-width', 1);
+  },
+  renderBasic: function(source, nodes, links) {
     var svg = this.svg;
     var state = this.state;
     var color = this.helpers.color;
