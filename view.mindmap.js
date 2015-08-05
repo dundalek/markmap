@@ -33,24 +33,6 @@ function traverseMinDistance(node) {
   return val;
 }
 
-function traverseHelperNodes(node) {
-  var children = node.children;
-  if (children && children.length > 0) {
-    var tmp = {
-      name: '',
-      children: children
-    };
-    node.children = [tmp];
-  } else {
-    node.children = [{
-      name: ''
-    }];
-  }
-  if (children) {
-    children.forEach(traverseHelperNodes);
-  }
-}
-
 function getLabelWidth(d) {
   // constant ratio for now, needs to be measured based on font
   return d.name.length * 5;
@@ -88,6 +70,10 @@ assign(Markmap.prototype, {
   defaults: function() {
     return {
       autoFit: true,
+      nodeHeight: 10,
+      nodeWidth: 180,
+      spacingVertical: 10,
+      spacingHorizontal: 180,
       duration: 750,
       zoomScale: 1,
       zoomTranslate: [0, 0],
@@ -166,9 +152,8 @@ assign(Markmap.prototype, {
     return this;
   },
   setData: function(data) {
-    traverseHelperNodes(data);
-    if (data.children && data.children[0] && data.children[0].children) {
-      data.children[0].children.forEach(function(d, i) {
+    if (data.children) {
+      data.children.forEach(function(d, i) {
         traverseBranchId(d, i);
       });
     }
@@ -205,11 +190,11 @@ assign(Markmap.prototype, {
         links = layout.links(nodes);
 
     // Normalize
-    var ratio = 20 / traverseMinDistance(state.root);
+    var ratio = (state.nodeHeight + state.spacingVertical) / traverseMinDistance(state.root);
     offset -= state.root.x * ratio;
 
     nodes.forEach(function(d) {
-      d.y = d.depth * 180;
+      d.y = d.depth * (state.nodeWidth + state.spacingHorizontal);
       d.x = d.x * ratio + offset;
     });
 
@@ -238,6 +223,14 @@ assign(Markmap.prototype, {
     var color = this.helpers.color;
     var linkShape = this.helpers.linkShape;
     
+    function linkWidth(d) {
+      var depth = d.depth;
+      if (d.name !== '' && d.children && d.children.length === 1 && d.children[0].name === '') {
+        depth += 1;
+      }
+      return Math.max(8 - depth, 1.5);
+    }
+    
     // Update the nodes…
     var node = svg.selectAll("g.markmap-node")
         .data(nodes, function(d) { return d.id || (d.id = ++this.i); }.bind(this));
@@ -248,15 +241,24 @@ assign(Markmap.prototype, {
         .attr("transform", function(d) { return "translate(" + source.y0 + "," + source.x0 + ")"; })
         .on("click", this.click.bind(this));
 
+    nodeEnter.append('rect')
+      .attr('class', 'markmap-node-rect')
+      .attr("y", function(d) { return -linkWidth(d) / 2 })
+      .attr('x', state.nodeWidth)
+      .attr('width', 0)
+      .attr('height', linkWidth)
+      .attr('fill', function(d) { return color(d.branch); });
+
     nodeEnter.append("circle")
         .attr('class', 'markmap-node-circle')
+        .attr('cx', state.nodeWidth)
         .attr('stroke', function(d) { return color(d.branch); })
         .attr("r", 1e-6)
         .style("fill", function(d) { return d._children ? color(d.branch) : "#fff"; });
 
     nodeEnter.append("text")
         .attr('class', 'markmap-node-text')
-        .attr("x", function(d) { return  10; })
+        .attr("x", state.nodeWidth)
         .attr("dy", "-0.5em")
         .attr("text-anchor", function(d) { return "start"; })
         .text(function(d) { return d.name; })
@@ -266,6 +268,10 @@ assign(Markmap.prototype, {
     var nodeUpdate = node.transition()
         .duration(state.duration)
         .attr("transform", function(d) { return "translate(" + d.y + "," + d.x + ")"; });
+
+    nodeUpdate.select('rect')
+      .attr('x', -1)
+      .attr('width', state.nodeWidth + 2);
 
     nodeUpdate.select("circle")
         .attr("r", 4.5)
@@ -279,6 +285,7 @@ assign(Markmap.prototype, {
         });
 
     nodeUpdate.select("text")
+        .attr("x", 10)
         .style("fill-opacity", 1);
 
     // Transition exiting nodes to the parent's new position.
@@ -287,11 +294,17 @@ assign(Markmap.prototype, {
         .attr("transform", function(d) { return "translate(" + source.y + "," + source.x + ")"; })
         .remove();
 
+    nodeExit.select('rect')
+      .attr('x', state.nodeWidth)
+      .attr('width', 0);
+
     nodeExit.select("circle")
         .attr("r", 1e-6);
 
     nodeExit.select("text")
-        .style("fill-opacity", 1e-6);
+        .style("fill-opacity", 1e-6)
+        .attr("x", state.nodeWidth);
+
 
     // Update the links…
     var link = svg.selectAll("path.markmap-link")
@@ -301,29 +314,26 @@ assign(Markmap.prototype, {
     link.enter().insert("path", "g")
         .attr("class", "markmap-link")
         .attr('stroke', function(d) { return color(d.target.branch); })
-        .attr('stroke-width', function(l) {
-          var d = l.target;
-          var depth = d.depth;
-          if (d.name !== '' && d.children && d.children.length === 1 && d.children[0].name === '') {
-            depth += 1;
-          }
-          return Math.max(8 - depth, 1.5);
-        })
+        .attr('stroke-width', function(l) {return linkWidth(l.target);})
         .attr("d", function(d) {
-          var o = {x: source.x0, y: source.y0};
+          var o = {x: source.x0, y: source.y0 + state.nodeWidth};
           return linkShape({source: o, target: o});
         });
 
     // Transition links to their new position.
     link.transition()
         .duration(state.duration)
-        .attr("d", linkShape);
-
+        .attr("d", function(d) {
+          var s = {x: d.source.x, y: d.source.y + state.nodeWidth};
+          var t = {x: d.target.x, y: d.target.y};
+          return linkShape({source: s, target: t});
+        });
+         
     // Transition exiting nodes to the parent's new position.
     link.exit().transition()
         .duration(state.duration)
         .attr("d", function(d) {
-          var o = {x: source.x, y: source.y};
+          var o = {x: source.x, y: source.y + state.nodeWidth};
           return linkShape({source: o, target: o});
         })
         .remove();
