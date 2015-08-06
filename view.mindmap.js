@@ -20,6 +20,7 @@ var assign = Object.assign || function(dst, src) {
       dst[k] = src[k];
     }
   }
+  return dst;
 };
 
 function traverseMinDistance(node) {
@@ -66,21 +67,29 @@ function Markmap(svg, data, options) {
   this.init(svg, data, options);
 }
 
+var defaultPreset = {
+  autoFit: true,
+  nodeHeight: 20,
+  nodeWidth: 180,
+  spacingVertical: 10,
+  spacingHorizontal: 120,
+  duration: 750,
+  zoomScale: 1,
+  zoomTranslate: [0, 0],
+  layout: 'tree',
+  color: 'gray',
+  linkShape: 'diagonal',
+  renderer: 'boxed'
+};
+
 assign(Markmap.prototype, {
-  defaults: function() {
-    return {
-      autoFit: true,
-      nodeHeight: 20,
-      nodeWidth: 180,
-      spacingVertical: 10,
-      spacingHorizontal: 120,
-      duration: 750,
-      zoomScale: 1,
-      zoomTranslate: [0, 0],
-      layout: 'tree',
-      color: 'category20',
-      linkShape: 'diagonal'
-    };
+  presets: {
+    'default': defaultPreset,
+    'colorful': assign(assign({}, defaultPreset), {
+      nodeHeight: 10,
+      renderer: 'basic',
+      color: 'category20'
+    })
   },
   helperNames: ['layout', 'linkShape', 'color'],
   layouts: {
@@ -100,7 +109,10 @@ assign(Markmap.prototype, {
       };
     }
   },
-  colors: d3.scale,
+  colors: assign(
+    {gray: function() {return function() {return '#929292';}}},
+    d3.scale
+  ),
   init: function(svg, data, options) {
     options = options || {};
 
@@ -109,7 +121,7 @@ assign(Markmap.prototype, {
     this.helpers = {};
     this.i = 0;
     var state = this.state = {};
-    this.set(this.defaults());
+    this.set(this.presets[options.preset || 'default']);
     state.height = svg.node().offsetHeight;
     state.width = svg.node().offsetWidth;
     this.set(options);
@@ -141,6 +153,9 @@ assign(Markmap.prototype, {
     this.svg.attr("transform", "translate(" + state.zoomTranslate + ")" + " scale(" + state.zoomScale + ")")
   },
   set: function(values) {
+    if (values.preset) {
+      this.set(this.presets[values.preset]);
+    }
     var state = this.state;
     var helpers = this.helpers;
     this.helperNames.forEach(function(h) {
@@ -218,162 +233,160 @@ assign(Markmap.prototype, {
     };
   },
   render: function(source, nodes, links) {
-    var svg = this.svg;
-    var state = this.state;
-    var color = this.helpers.color = function() {
-      return '#929292';
-    };
-    this.renderBasic(source, nodes, links);
-    var node = svg.selectAll("g.markmap-node");
-
-    node.selectAll('rect')
-      .attr("y", -state.nodeHeight/2)
-      .attr('rx', 10)
-      .attr('ry', 10)
-      .attr('height', state.nodeHeight)
-      .attr('fill', '#E0E0E0')
-      .attr('stroke', color)
-      .attr('stroke-width', 1);
-    
-    node.selectAll('text')
-     .attr("dy", ".3em")
-      
-    svg.selectAll("path.markmap-link")
-      .attr('stroke', color)
-      .attr('stroke-width', 1);
+    this.renderers[this.state.renderer].call(this, source, nodes, links);
   },
-  renderBasic: function(source, nodes, links) {
-    var svg = this.svg;
-    var state = this.state;
-    var color = this.helpers.color;
-    var linkShape = this.helpers.linkShape;
-    
-    function linkWidth(d) {
-      var depth = d.depth;
-      if (d.name !== '' && d.children && d.children.length === 1 && d.children[0].name === '') {
-        depth += 1;
-      }
-      return Math.max(8 - depth, 1.5);
-    }
-    
-    // Update the nodes…
-    var node = svg.selectAll("g.markmap-node")
-        .data(nodes, function(d) { return d.id || (d.id = ++this.i); }.bind(this));
+  renderers: {
+    boxed: function(source, nodes, links) {
+      var svg = this.svg;
+      var state = this.state;
+      var color = this.helpers.color;
+      this.renderers.basic.call(this, source, nodes, links);
+      var node = svg.selectAll("g.markmap-node");
 
-    // Enter any new nodes at the parent's previous position.
-    var nodeEnter = node.enter().append("g")
-        .attr("class", "markmap-node")
-        .attr("transform", function(d) { return "translate(" + source.y0 + "," + source.x0 + ")"; })
-        .on("click", this.click.bind(this));
-
-    nodeEnter.append('rect')
-      .attr('class', 'markmap-node-rect')
-      .attr("y", function(d) { return -linkWidth(d) / 2 })
-      .attr('x', state.nodeWidth)
-      .attr('width', 0)
-      .attr('height', linkWidth)
-      .attr('fill', function(d) { return color(d.branch); });
-
-    nodeEnter.append("circle")
-        .attr('class', 'markmap-node-circle')
-        .attr('cx', state.nodeWidth)
+      node.select('rect')
+        .attr("y", -state.nodeHeight/2)
+        .attr('rx', 10)
+        .attr('ry', 10)
+        .attr('height', state.nodeHeight)
+        .attr('fill', function(d) { return d3.rgb(color(d.branch)).brighter(1.2); })
         .attr('stroke', function(d) { return color(d.branch); })
-        .attr("r", 1e-6)
-        .style("fill", function(d) { return d._children ? color(d.branch) : "#fff"; });
+        .attr('stroke-width', 1);
+      
+      node.select('text')
+       .attr("dy", ".3em")
+        
+      svg.selectAll("path.markmap-link")
+        .attr('stroke-width', 1);
+    },
+    basic: function(source, nodes, links) {
+      var svg = this.svg;
+      var state = this.state;
+      var color = this.helpers.color;
+      var linkShape = this.helpers.linkShape;
+      
+      function linkWidth(d) {
+        var depth = d.depth;
+        if (d.name !== '' && d.children && d.children.length === 1 && d.children[0].name === '') {
+          depth += 1;
+        }
+        return Math.max(6 - 2*depth, 1.5);
+      }
+      
+      // Update the nodes…
+      var node = svg.selectAll("g.markmap-node")
+          .data(nodes, function(d) { return d.id || (d.id = ++this.i); }.bind(this));
 
-    nodeEnter.append("text")
-        .attr('class', 'markmap-node-text')
-        .attr("x", state.nodeWidth)
-        .attr("dy", "-0.5em")
-        .attr("text-anchor", function(d) { return "start"; })
-        .text(function(d) { return d.name; })
-        .style("fill-opacity", 1e-6);
+      // Enter any new nodes at the parent's previous position.
+      var nodeEnter = node.enter().append("g")
+          .attr("class", "markmap-node")
+          .attr("transform", function(d) { return "translate(" + source.y0 + "," + source.x0 + ")"; })
+          .on("click", this.click.bind(this));
 
-    // Transition nodes to their new position.
-    var nodeUpdate = node.transition()
-        .duration(state.duration)
-        .attr("transform", function(d) { return "translate(" + d.y + "," + d.x + ")"; });
+      nodeEnter.append('rect')
+        .attr('class', 'markmap-node-rect')
+        .attr("y", function(d) { return -linkWidth(d) / 2 })
+        .attr('x', state.nodeWidth)
+        .attr('width', 0)
+        .attr('height', linkWidth)
+        .attr('fill', function(d) { return color(d.branch); });
 
-    nodeUpdate.select('rect')
-      .attr('x', -1)
-      .attr('width', state.nodeWidth + 2);
+      nodeEnter.append("circle")
+          .attr('class', 'markmap-node-circle')
+          .attr('cx', state.nodeWidth)
+          .attr('stroke', function(d) { return color(d.branch); })
+          .attr("r", 1e-6)
+          .style("fill", function(d) { return d._children ? color(d.branch) : "#fff"; });
 
-    nodeUpdate.select("circle")
-        .attr("r", 4.5)
-        .style("fill", function(d) {
-           return d._children ? color(d.branch) : "#fff"
-        })
-        .style('display', function(d) {
-          var isLabelNode = d.name !== '' && d.children && d.children.length === 1 && d.children[0].name === '';
-          var hasChildren = d.children || d._children;
-          return isLabelNode || !hasChildren ? 'none' : 'inline';
-        });
+      nodeEnter.append("text")
+          .attr('class', 'markmap-node-text')
+          .attr("x", state.nodeWidth)
+          .attr("dy", "-0.5em")
+          .attr("text-anchor", function(d) { return "start"; })
+          .text(function(d) { return d.name; })
+          .style("fill-opacity", 1e-6);
 
-    nodeUpdate.select("text")
-        .attr("x", 10)
-        .style("fill-opacity", 1);
+      // Transition nodes to their new position.
+      var nodeUpdate = node.transition()
+          .duration(state.duration)
+          .attr("transform", function(d) { return "translate(" + d.y + "," + d.x + ")"; });
 
-    // Transition exiting nodes to the parent's new position.
-    var nodeExit = node.exit().transition()
-        .duration(state.duration)
-        .attr("transform", function(d) { return "translate(" + source.y + "," + source.x + ")"; })
-        .remove();
+      nodeUpdate.select('rect')
+        .attr('x', -1)
+        .attr('width', state.nodeWidth + 2);
 
-    nodeExit.select('rect')
-      .attr('x', state.nodeWidth)
-      .attr('width', 0);
+      nodeUpdate.select("circle")
+          .attr("r", 4.5)
+          .style("fill", function(d) {
+             return d._children ? color(d.branch) : "#fff"
+          })
+          .style('display', function(d) {
+            var hasChildren = d.children || d._children;
+            return hasChildren ?  'inline' : 'none';
+          });
 
-    nodeExit.select("circle")
-        .attr("r", 1e-6);
+      nodeUpdate.select("text")
+          .attr("x", 10)
+          .style("fill-opacity", 1);
 
-    nodeExit.select("text")
-        .style("fill-opacity", 1e-6)
-        .attr("x", state.nodeWidth);
+      // Transition exiting nodes to the parent's new position.
+      var nodeExit = node.exit().transition()
+          .duration(state.duration)
+          .attr("transform", function(d) { return "translate(" + source.y + "," + source.x + ")"; })
+          .remove();
+
+      nodeExit.select('rect')
+        .attr('x', state.nodeWidth)
+        .attr('width', 0);
+
+      nodeExit.select("circle")
+          .attr("r", 1e-6);
+
+      nodeExit.select("text")
+          .style("fill-opacity", 1e-6)
+          .attr("x", state.nodeWidth);
 
 
-    // Update the links…
-    var link = svg.selectAll("path.markmap-link")
-        .data(links, function(d) { return d.target.id; });
+      // Update the links…
+      var link = svg.selectAll("path.markmap-link")
+          .data(links, function(d) { return d.target.id; });
 
-    // Enter any new links at the parent's previous position.
-    link.enter().insert("path", "g")
-        .attr("class", "markmap-link")
-        .attr('stroke', function(d) { return color(d.target.branch); })
-        .attr('stroke-width', function(l) {return linkWidth(l.target);})
-        .attr("d", function(d) {
-          var o = {x: source.x0, y: source.y0 + state.nodeWidth};
-          return linkShape({source: o, target: o});
-        });
+      // Enter any new links at the parent's previous position.
+      link.enter().insert("path", "g")
+          .attr("class", "markmap-link")
+          .attr('stroke', function(d) { return color(d.target.branch); })
+          .attr('stroke-width', function(l) {return linkWidth(l.target);})
+          .attr("d", function(d) {
+            var o = {x: source.x0, y: source.y0 + state.nodeWidth};
+            return linkShape({source: o, target: o});
+          });
 
-    // Transition links to their new position.
-    link.transition()
-        .duration(state.duration)
-        .attr("d", function(d) {
-          var s = {x: d.source.x, y: d.source.y + state.nodeWidth};
-          var t = {x: d.target.x, y: d.target.y};
-          return linkShape({source: s, target: t});
-        });
-         
-    // Transition exiting nodes to the parent's new position.
-    link.exit().transition()
-        .duration(state.duration)
-        .attr("d", function(d) {
-          var o = {x: source.x, y: source.y + state.nodeWidth};
-          return linkShape({source: o, target: o});
-        })
-        .remove();
+      // Transition links to their new position.
+      link.transition()
+          .duration(state.duration)
+          .attr("d", function(d) {
+            var s = {x: d.source.x, y: d.source.y + state.nodeWidth};
+            var t = {x: d.target.x, y: d.target.y};
+            return linkShape({source: s, target: t});
+          });
+           
+      // Transition exiting nodes to the parent's new position.
+      link.exit().transition()
+          .duration(state.duration)
+          .attr("d", function(d) {
+            var o = {x: source.x, y: source.y + state.nodeWidth};
+            return linkShape({source: o, target: o});
+          })
+          .remove();
 
-    // Stash the old positions for transition.
-    nodes.forEach(function(d) {
-      d.x0 = d.x;
-      d.y0 = d.y;
-    });
+      // Stash the old positions for transition.
+      nodes.forEach(function(d) {
+        d.x0 = d.x;
+        d.y0 = d.y;
+      });
+    }
   },
   // Toggle children on click.
   click: function(d) {
-    if (d.name !== '' && d.children && d.children.length === 1 && d.children[0].name === '') {
-      d = d.children[0];
-    }
     if (d.children) {
       d._children = d.children;
       d.children = null;
