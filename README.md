@@ -3,9 +3,9 @@
 
 *Markmap* is a javascript component that will visualize your markdown documents as mindmaps. It is useful for better navigation and overview of the content. You can see it in action online [here](http://kb.knomaton.org/multi-agent-systems/). It is also used in an [extension](https://atom.io/packages/markdown-mindmap) for Atom editor.
 
-| ![markmap in action](examples/mindmap-screenshot.png) | ![markmap in action](examples/mindmap-screenshot2.png) | 
+| ![markmap in action](examples/mindmap-screenshot2.png) | ![markmap in action](examples/mindmap-screenshot.png) | 
 |:-:|:-:|
-| Basic style | Second style |
+| Default style | Colorful style |
 
 
 ## Features
@@ -24,6 +24,7 @@ npm install markmap
 ```
 
 Visualizing a markdown text consists of two steps:
+
 1. The text is parsed and transformed into a tree representation.
 2. The tree is rendered.
 
