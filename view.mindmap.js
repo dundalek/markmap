@@ -68,14 +68,11 @@ function Markmap(svg, data, options) {
 }
 
 var defaultPreset = {
-  autoFit: true,
   nodeHeight: 20,
   nodeWidth: 180,
   spacingVertical: 10,
   spacingHorizontal: 120,
   duration: 750,
-  zoomScale: 1,
-  zoomTranslate: [0, 0],
   layout: 'tree',
   color: 'gray',
   linkShape: 'diagonal',
@@ -83,6 +80,13 @@ var defaultPreset = {
 };
 
 assign(Markmap.prototype, {
+  getInitialState: function() {
+    return {
+      zoomScale: 1,
+      zoomTranslate: [0, 0],
+      autoFit: true
+    };
+  },
   presets: {
     'default': defaultPreset,
     'colorful': assign(assign({}, defaultPreset), {
@@ -120,7 +124,7 @@ assign(Markmap.prototype, {
 
     this.helpers = {};
     this.i = 0;
-    var state = this.state = {};
+    var state = this.state = this.getInitialState();
     this.set(this.presets[options.preset || 'default']);
     state.height = svg.node().offsetHeight;
     state.width = svg.node().offsetWidth;
