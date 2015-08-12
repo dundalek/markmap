@@ -2,7 +2,7 @@ var child_process = require('child_process');
 
 function pandocOptions(inputType) {
   return {
-    path: 'pandoc',
+    path: process.platform === 'win32' ? 'pandoc.exe' : 'pandoc',
     args: ['-f', inputType || 'markdown', '-t', 'json', '--trace']
   };
 }
@@ -62,18 +62,28 @@ function pandocToString(tokens) {
 }
 
 function processPandoc(json, trace) {
-  return [];
-  var re = /(?:\n|^)line \d+: \[Header/g;
+  var re = /(?:\n|^)line \d+: \[(?:Header|DefinitionList)/g;
   var lines = trace.match(re);
   var tokens = JSON.parse(json)[1];
   
   var headings = [];
+  var currentDepth = 0;
   for (var i = 0, j = 0; i < tokens.length; i += 1) {
     if (tokens[i].t === 'Header') {
+      currentDepth = tokens[i].c[0]
       headings.push({
-        depth: tokens[i].c[0],
+        depth: currentDepth,
         line: parseInt(lines[j++].match(/\d+/)[0], 10)-1,
         name: pandocToString(tokens[i].c[2])
+      });
+    } else if (tokens[i].t === 'DefinitionList') {
+      var line = parseInt(lines[j++].match(/\d+/)[0], 10)-1;
+      tokens[i].c.forEach(function(d) {
+        headings.push({
+          depth: currentDepth + 1,
+          line: line,
+          name: pandocToString(d[0])
+        });
       });
     }
   }
