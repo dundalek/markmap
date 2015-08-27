@@ -299,7 +299,7 @@ assign(Markmap.prototype, {
           .attr('cx', state.nodeWidth)
           .attr('stroke', function(d) { return color(d.branch); })
           .attr("r", 1e-6)
-          .style("fill", function(d) { return d._children ? color(d.branch) : "#fff"; });
+          .style("fill", function(d) { return d._children ? color(d.branch) : ''; });
 
       nodeEnter.append("text")
           .attr('class', 'markmap-node-text')
@@ -320,9 +320,7 @@ assign(Markmap.prototype, {
 
       nodeUpdate.select("circle")
           .attr("r", 4.5)
-          .style("fill", function(d) {
-             return d._children ? color(d.branch) : "#fff"
-          })
+          .style("fill", function(d) { return d._children ? color(d.branch) : ''; })
           .style('display', function(d) {
             var hasChildren = d.children || d._children;
             return hasChildren ?  'inline' : 'none';
