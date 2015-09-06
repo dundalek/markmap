@@ -223,7 +223,7 @@ assign(Markmap.prototype, {
       var maxX = d3.max(nodes, function(d) {return d.x;});
       var maxY = d3.max(nodes, function(d) {return d.y;});
       var realHeight = maxX - minX;
-      var realWidth = maxY - minY;
+      var realWidth = maxY - minY + state.nodeWidth;
       var scale = Math.min(state.height / realHeight, state.width / realWidth, 1);
       var translate = [(state.width-realWidth*scale)/2-minY*scale, (state.height-realHeight*scale)/2-minX*scale];
       this.updateZoom(translate, scale);
