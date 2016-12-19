@@ -126,8 +126,8 @@ assign(Markmap.prototype, {
     this.i = 0;
     var state = this.state = this.getInitialState();
     this.set(this.presets[options.preset || 'default']);
-    state.height = svg.node().offsetHeight;
-    state.width = svg.node().offsetWidth;
+    state.height = svg.node().getBoundingClientRect().height;
+    state.width = svg.node().getBoundingClientRect().width;
     this.set(options);
 
     var zoom = this.zoom = d3.behavior.zoom()
