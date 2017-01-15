@@ -181,7 +181,7 @@ assign(Markmap.prototype, {
     state.root = data;
     state.root.x0 = state.height / 2;
     state.root.y0 = 0;
-    
+
     // function collapse(d) {
     //   if (d.children) {
     //     d._children = d.children;
@@ -193,13 +193,27 @@ assign(Markmap.prototype, {
     return this;
   },
   update: function(source) {
-    source = source || this.state.root;
-    var res = this.layout(source);
+    var state = this.state;
+    source = source || state.root;
+    var res = this.layout(state);
+    if (state.autoFit) {
+      var minX = d3.min(res.nodes, function(d) {return d.x;});
+      var minY = d3.min(res.nodes, function(d) {return d.y;});
+      var maxX = d3.max(res.nodes, function(d) {return d.x;});
+      var maxY = d3.max(res.nodes, function(d) {return d.y;});
+      var realHeight = maxX - minX;
+      var realWidth = maxY - minY + state.nodeWidth;
+      var scale = Math.min(state.height / realHeight, state.width / realWidth, 1);
+      var translate = [
+        (state.width-realWidth*scale)/2-minY*scale,
+        (state.height-realHeight*scale)/2-minX*scale
+      ];
+      this.updateZoom(translate, scale);
+    }
     this.render(source, res.nodes, res.links);
     return this;
   },
-  layout: function(source) {
-    var state = this.state;
+  layout: function(state) {
     var layout = this.helpers.layout;
 
     var offset = state.root.x !== undefined ? state.root.x : state.root.x0;
@@ -216,18 +230,6 @@ assign(Markmap.prototype, {
       d.y = d.depth * (state.nodeWidth + state.spacingHorizontal);
       d.x = d.x * ratio + offset;
     });
-
-    if (state.autoFit) {
-      var minX = d3.min(nodes, function(d) {return d.x;});
-      var minY = d3.min(nodes, function(d) {return d.y;});
-      var maxX = d3.max(nodes, function(d) {return d.x;});
-      var maxY = d3.max(nodes, function(d) {return d.y;});
-      var realHeight = maxX - minX;
-      var realWidth = maxY - minY + state.nodeWidth;
-      var scale = Math.min(state.height / realHeight, state.width / realWidth, 1);
-      var translate = [(state.width-realWidth*scale)/2-minY*scale, (state.height-realHeight*scale)/2-minX*scale];
-      this.updateZoom(translate, scale);
-    }
 
     //traverseLabelWidth(root, 0);
 
@@ -255,7 +257,7 @@ assign(Markmap.prototype, {
         .attr('fill', function(d) { return d3.rgb(color(d.branch)).brighter(1.2); })
         .attr('stroke', function(d) { return color(d.branch); })
         .attr('stroke-width', 1);
-      
+
       node.select('text')
        .attr("dy", "3")
 
@@ -267,7 +269,7 @@ assign(Markmap.prototype, {
       var state = this.state;
       var color = this.helpers.color;
       var linkShape = this.helpers.linkShape;
-      
+
       function linkWidth(d) {
         var depth = d.depth;
         if (d.name !== '' && d.children && d.children.length === 1 && d.children[0].name === '') {
@@ -275,7 +277,7 @@ assign(Markmap.prototype, {
         }
         return Math.max(6 - 2*depth, 1.5);
       }
-      
+
       // Update the nodes…
       var node = svg.selectAll("g.markmap-node")
           .data(nodes, function(d) { return d.id || (d.id = ++this.i); }.bind(this));
@@ -370,7 +372,7 @@ assign(Markmap.prototype, {
             var t = {x: d.target.x, y: d.target.y};
             return linkShape({source: s, target: t});
           });
-           
+
       // Transition exiting nodes to the parent's new position.
       link.exit().transition()
           .duration(state.duration)
@@ -398,7 +400,7 @@ assign(Markmap.prototype, {
     }
     this.update(d);
   }
-  
+
 });
 
 return Markmap;
