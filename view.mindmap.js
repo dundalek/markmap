@@ -257,8 +257,8 @@ assign(Markmap.prototype, {
         .attr('stroke-width', 1);
       
       node.select('text')
-       .attr("dy", ".3em")
-        
+       .attr("dy", "3")
+
       svg.selectAll("path.markmap-link")
         .attr('stroke-width', 1);
     },
@@ -304,7 +304,7 @@ assign(Markmap.prototype, {
       nodeEnter.append("text")
           .attr('class', 'markmap-node-text')
           .attr("x", state.nodeWidth)
-          .attr("dy", "-0.5em")
+          .attr("dy", "-5")
           .attr("text-anchor", function(d) { return "start"; })
           .text(function(d) { return d.name; })
           .style("fill-opacity", 1e-6);
