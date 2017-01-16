@@ -130,6 +130,14 @@ assign(Markmap.prototype, {
     state.width = svg.node().getBoundingClientRect().width;
     this.set(options);
 
+    // disable panning using right mouse button
+    svg.on("mousedown", function() {
+      var ev = d3.event;
+      if (ev.button === 2) {
+        ev.stopImmediatePropagation();
+      }
+    });
+
     var zoom = this.zoom = d3.behavior.zoom()
        .on("zoom", function() {
          this.updateZoom(d3.event.translate, d3.event.scale);
