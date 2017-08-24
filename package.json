@@ -19,7 +19,7 @@
   "author": "Jakub Dundalek",
   "license": "MIT",
   "dependencies": {
-    "d3": "^3.5.6",
-    "remarkable": "^1.6.0"
+    "d3": "^3.5.17",
+    "remarkable": "^1.7.0"
   }
 }
