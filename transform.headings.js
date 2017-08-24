@@ -31,6 +31,7 @@ module.exports = function transformHeadings(headings) {
     node.children.push(h);
   });
 
+  root = autoCollapse(root, 0);
   if (root.children.length === 1) {
     // there is only one child - it is the title, make it root
     root = root.children[0];
@@ -38,3 +39,23 @@ module.exports = function transformHeadings(headings) {
 
   return root;
 };
+
+function autoCollapse(node, offset) {
+  node.depth -= offset;
+  if (node.children && node.children.length === 1 && node.children[0].autoCollapse) {
+    node.children = node.children[0].children;
+    offset += 1;
+  }
+  if (node.children) {
+    node.children = node.children.map(function(child) {
+      if (child.autoCollapse && child.children && child.children.length === 1) {
+        return autoCollapse(child.children[0], offset + 1);
+      }
+      return autoCollapse(child, offset)
+    });
+  }
+  if (node.autoCollapse) {
+    delete node.autoCollapse;
+  }
+  return node;
+}

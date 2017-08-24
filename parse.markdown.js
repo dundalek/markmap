@@ -19,8 +19,18 @@ module.exports = function parseMarkdown(text, options) {
       i += 1;
     } else if (parseLists) {
       switch (tokens[i].type) {
-        case 'bullet_list_open': depth += 1; break;
-        case 'bullet_list_close': depth -= 1; break;
+        case 'bullet_list_open':
+          headings.push({
+            depth: depth + 1,
+            line: tokens[i].lines[0],
+            name: '',
+            autoCollapse: true
+          });
+          depth += 2;
+          break;
+        case 'bullet_list_close':
+          depth -= 2;
+          break;
         case 'list_item_open':
           headings.push({
             depth: depth,
