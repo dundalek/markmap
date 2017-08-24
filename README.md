@@ -3,7 +3,7 @@
 
 *Markmap* is a javascript component that will visualize your markdown documents as mindmaps. It is useful for better navigation and overview of the content. You can see it in action online [here](http://kb.knomaton.org/multi-agent-systems/). It is also used in an [extension](https://atom.io/packages/markdown-mindmap) for Atom editor.
 
-| ![markmap in action](examples/mindmap-screenshot2.png) | ![markmap in action](examples/mindmap-screenshot.png) | 
+| ![markmap in action](examples/mindmap-screenshot2.png) | ![markmap in action](examples/mindmap-screenshot.png) |
 |:-:|:-:|
 | Default style | Colorful style |
 
@@ -35,3 +35,7 @@ See the file [example.parse.js](examples/example.parse.js) in the examples folde
 ### Rendering
 
 See the file [example.view.js](examples/example.view.js) in the examples folder to see how to render a mindmap.
+
+## License
+
+The MIT License.
