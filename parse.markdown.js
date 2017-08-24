@@ -4,6 +4,9 @@ module.exports = function parseMarkdown(text, options) {
 
   var Remarkable = require('remarkable');
   var md = new Remarkable();
+  md.block.ruler.enable([
+    'deflist'
+  ]);
 
   var tokens = md.parse(text, {})
   var headings = [];
@@ -20,6 +23,7 @@ module.exports = function parseMarkdown(text, options) {
     } else if (parseLists) {
       switch (tokens[i].type) {
         case 'bullet_list_open':
+        case 'dl_open':
           headings.push({
             depth: depth + 1,
             line: tokens[i].lines[0],
@@ -29,6 +33,7 @@ module.exports = function parseMarkdown(text, options) {
           depth += 2;
           break;
         case 'bullet_list_close':
+        case 'dl_close':
           depth -= 2;
           break;
         case 'list_item_open':
@@ -38,6 +43,14 @@ module.exports = function parseMarkdown(text, options) {
             name: tokens[i+2].content
           });
           i += 2;
+          break;
+        case 'dt_open':
+          headings.push({
+            depth: depth,
+            line: tokens[i].lines[0],
+            name: tokens[i+1].content
+          });
+          i += 1;
           break;
       }
     }

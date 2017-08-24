@@ -109,3 +109,18 @@ it('parses lists under headings', () => {
     }
   ]);
 });
+
+it('parses definition lists', () => {
+  expect(parse("a\n: text")).toEqual([
+    {
+      "autoCollapse": true,
+      "depth": 1,
+      "line": 0,
+      "name": ""
+    }, {
+      "depth": 2,
+      "line": 0,
+      "name": "a"
+    }
+  ]);
+});
