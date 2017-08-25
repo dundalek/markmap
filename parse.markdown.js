@@ -17,7 +17,7 @@ module.exports = function parseMarkdown(text, options) {
       headings.push({
         depth: depth,
         line: tokens[i].lines[0],
-        name: tokens[i+1].content
+        name: tokens[i+1].content || ''
       });
       i += 1;
     } else if (parseLists) {
@@ -40,7 +40,7 @@ module.exports = function parseMarkdown(text, options) {
           headings.push({
             depth: depth,
             line: tokens[i].lines[0],
-            name: tokens[i+2].content
+            name: tokens[i+2].content || ''
           });
           i += 2;
           break;
@@ -48,7 +48,7 @@ module.exports = function parseMarkdown(text, options) {
           headings.push({
             depth: depth,
             line: tokens[i].lines[0],
-            name: tokens[i+1].content
+            name: tokens[i+1].content || ''
           });
           i += 1;
           break;
