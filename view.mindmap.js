@@ -23,9 +23,6 @@ var assign = Object.assign || function(dst, src) {
   return dst;
 };
 
-var depthMaxSize = {};
-var yByDepth = {};
-
 function traverseMinDistance(node) {
   var val = Infinity;
   if (node.children) {
@@ -57,25 +54,25 @@ function traverseLabelWidth(d, offset) {
 }
 
 // Set depth width to all nodes
-function traverseBranchIdAndDepthWidth(node, branch) {
+function traverseBranchIdAndDepthWidth(node, branch, state) {
   node.branch = branch;
-  node.depthWidth = depthMaxSize[node.depth];
+  node.depthWidth = state.depthMaxSize[node.depth];
   if (node.children) {
     node.children.forEach(function(d) {
-      traverseBranchIdAndDepthWidth(d, branch);
+      traverseBranchIdAndDepthWidth(d, branch, state);
     });
   }
 }
 
 // Depth width = max width of nodes in depth
-function traverseDepthSize(node) {
+function traverseDepthSize(node, state) {
   var d = node.depth;
   var s = getLabelWidth(node);
-  depthMaxSize[d] = (depthMaxSize[d] === undefined || depthMaxSize[d] < s) ? s : depthMaxSize[d];
+  state.depthMaxSize[d] = Math.max(state.depthMaxSize[d] || 0, s);
 
   if (node.children) {
     node.children.forEach(function(n) {
-      traverseDepthSize(n);
+      traverseDepthSize(n, state);
     });
   }
 }
@@ -102,7 +99,9 @@ assign(Markmap.prototype, {
     return {
       zoomScale: 1,
       zoomTranslate: [0, 0],
-      autoFit: true
+      autoFit: true,
+      depthMaxSize: {},
+      yByDepth: {}
     };
   },
   presets: {
@@ -197,12 +196,13 @@ assign(Markmap.prototype, {
     return this;
   },
   setData: function(data) {
-    traverseDepthSize(data);
+    var state = this.state;
+    traverseDepthSize(data, state);
     
-    data.depthWidth = depthMaxSize[data.depth];
+    data.depthWidth = state.depthMaxSize[data.depth];
     if (data.children) {
       data.children.forEach(function(d, i) {
-        traverseBranchIdAndDepthWidth(d, i);
+        traverseBranchIdAndDepthWidth(d, i, state);
       });
     }
 
@@ -255,16 +255,16 @@ assign(Markmap.prototype, {
     var ratio = (state.nodeHeight + state.spacingVertical) / traverseMinDistance(state.root);
     offset -= state.root.x * ratio;
 
-    for (d in depthMaxSize) {
+    for (d in state.depthMaxSize) {
       var y = 0;
       for (var i = 1; i < parseInt(d); i++) {
-        y += depthMaxSize[i] + state.spacingHorizontal;
+        y += state.depthMaxSize[i] + state.spacingHorizontal;
       }
-      yByDepth[d] = y;
+      state.yByDepth[d] = y;
     }
 
     nodes.forEach(function(d) {
-      d.y = yByDepth[parseInt(d.depth)+1];
+      d.y = state.yByDepth[parseInt(d.depth)+1];
       d.x = d.x * ratio + offset;
     });
 
