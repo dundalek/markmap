@@ -40,7 +40,7 @@ module.exports = function parseMarkdown(text, options) {
           headings.push({
             depth: depth,
             line: tokens[i].lines[0],
-            name: tokens[i+2].content || ''
+            name: (tokens[i+2].content || '').split('\n')[0]
           });
           i += 2;
           break;
