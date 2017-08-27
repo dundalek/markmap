@@ -198,7 +198,7 @@ assign(Markmap.prototype, {
   setData: function(data) {
     var state = this.state;
     traverseDepthSize(data, state);
-    
+
     data.depthWidth = state.depthMaxSize[data.depth];
     if (data.children) {
       data.children.forEach(function(d, i) {
@@ -322,7 +322,7 @@ assign(Markmap.prototype, {
       // Enter any new nodes at the parent's previous position.
       var nodeEnter = node.enter().append("g")
           .attr("class", "markmap-node")
-          .attr("transform", function(d) { return "translate(" + source.y0 + "," + source.x0 + ")"; })
+          .attr("transform", function(d) { return "translate(" + (source.y0 + source.depthWidth - d.depthWidth) + "," + source.x0 + ")"; })
           .on("click", this.click.bind(this));
 
       nodeEnter.append('rect')
@@ -375,7 +375,7 @@ assign(Markmap.prototype, {
       // Transition exiting nodes to the parent's new position.
       var nodeExit = node.exit().transition()
           .duration(state.duration)
-          .attr("transform", function(d) { return "translate(" + source.y + "," + source.x + ")"; })
+          .attr("transform", function(d) { return "translate(" + (source.y + source.depthWidth - d.depthWidth) + "," + source.x + ")"; })
           .remove();
 
       nodeExit.select('rect')
@@ -400,7 +400,7 @@ assign(Markmap.prototype, {
           .attr('stroke', function(d) { return color(d.target.branch); })
           .attr('stroke-width', function(l) {return linkWidth(l.target);})
           .attr("d", function(d) {
-            var o = {x: source.x0, y: source.y0 + d.source.depthWidth};
+            var o = {x: source.x0, y: source.y0 + source.depthWidth};
             return linkShape({source: o, target: o});
           });
 
@@ -417,7 +417,7 @@ assign(Markmap.prototype, {
       link.exit().transition()
           .duration(state.duration)
           .attr("d", function(d) {
-            var o = {x: source.x, y: source.y + d.source.depthWidth};
+            var o = {x: source.x, y: source.y + source.depthWidth};
             return linkShape({source: o, target: o});
           })
           .remove();
