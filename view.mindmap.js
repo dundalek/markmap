@@ -35,8 +35,8 @@ function traverseMinDistance(node) {
 }
 
 function getLabelWidth(d) {
-  // constant ratio for now, needs to be measured based on font
-  return d.name.length * 5;
+  // 5 per character and 25 bonus for rounded corner
+  return d.name.length * 5 + 25;
 }
 
 function traverseLabelWidth(d, offset) {
@@ -53,11 +53,26 @@ function traverseLabelWidth(d, offset) {
   }
 }
 
-function traverseBranchId(node, branch) {
+// Set depth width to all nodes
+function traverseBranchIdAndDepthWidth(node, branch, state) {
   node.branch = branch;
+  node.depthWidth = state.depthMaxSize[node.depth];
   if (node.children) {
     node.children.forEach(function(d) {
-      traverseBranchId(d, branch);
+      traverseBranchIdAndDepthWidth(d, branch, state);
+    });
+  }
+}
+
+// Depth width = max width of nodes in depth
+function traverseDepthSize(node, state) {
+  var d = node.depth;
+  var s = getLabelWidth(node);
+  state.depthMaxSize[d] = Math.max(state.depthMaxSize[d] || 0, s);
+
+  if (node.children) {
+    node.children.forEach(function(n) {
+      traverseDepthSize(n, state);
     });
   }
 }
@@ -84,7 +99,9 @@ assign(Markmap.prototype, {
     return {
       zoomScale: 1,
       zoomTranslate: [0, 0],
-      autoFit: true
+      autoFit: true,
+      depthMaxSize: {},
+      yByDepth: {}
     };
   },
   presets: {
@@ -179,9 +196,13 @@ assign(Markmap.prototype, {
     return this;
   },
   setData: function(data) {
+    var state = this.state;
+    traverseDepthSize(data, state);
+    
+    data.depthWidth = state.depthMaxSize[data.depth];
     if (data.children) {
       data.children.forEach(function(d, i) {
-        traverseBranchId(d, i);
+        traverseBranchIdAndDepthWidth(d, i, state);
       });
     }
 
@@ -234,8 +255,16 @@ assign(Markmap.prototype, {
     var ratio = (state.nodeHeight + state.spacingVertical) / traverseMinDistance(state.root);
     offset -= state.root.x * ratio;
 
+    for (d in state.depthMaxSize) {
+      var y = 0;
+      for (var i = 1; i < parseInt(d); i++) {
+        y += state.depthMaxSize[i] + state.spacingHorizontal;
+      }
+      state.yByDepth[d] = y;
+    }
+
     nodes.forEach(function(d) {
-      d.y = d.depth * (state.nodeWidth + state.spacingHorizontal);
+      d.y = state.yByDepth[parseInt(d.depth)+1];
       d.x = d.x * ratio + offset;
     });
 
@@ -299,21 +328,21 @@ assign(Markmap.prototype, {
       nodeEnter.append('rect')
         .attr('class', 'markmap-node-rect')
         .attr("y", function(d) { return -linkWidth(d) / 2 })
-        .attr('x', state.nodeWidth)
+        .attr('x', function(d) { return d.depthWidth; })
         .attr('width', 0)
         .attr('height', linkWidth)
         .attr('fill', function(d) { return color(d.branch); });
 
       nodeEnter.append("circle")
           .attr('class', 'markmap-node-circle')
-          .attr('cx', state.nodeWidth)
+          .attr('cx', function(d) { return d.depthWidth; })
           .attr('stroke', function(d) { return color(d.branch); })
           .attr("r", 1e-6)
           .style("fill", function(d) { return d._children ? color(d.branch) : ''; });
 
       nodeEnter.append("text")
           .attr('class', 'markmap-node-text')
-          .attr("x", state.nodeWidth)
+          .attr("x", function(d) { return d.depthWidth; })
           .attr("dy", "-5")
           .attr("text-anchor", function(d) { return "start"; })
           .text(function(d) { return d.name; })
@@ -326,7 +355,10 @@ assign(Markmap.prototype, {
 
       nodeUpdate.select('rect')
         .attr('x', -1)
-        .attr('width', state.nodeWidth + 2);
+        .attr('width', function(d) {
+          // Make small length node has enough width
+          return (d.children || d._children) ? d.depthWidth + 2 : getLabelWidth(d);
+        });
 
       nodeUpdate.select("circle")
           .attr("r", 4.5)
@@ -347,7 +379,7 @@ assign(Markmap.prototype, {
           .remove();
 
       nodeExit.select('rect')
-        .attr('x', state.nodeWidth)
+        .attr('x', function(d) { return d.depthWidth; })
         .attr('width', 0);
 
       nodeExit.select("circle")
@@ -355,7 +387,7 @@ assign(Markmap.prototype, {
 
       nodeExit.select("text")
           .style("fill-opacity", 1e-6)
-          .attr("x", state.nodeWidth);
+          .attr("x", function(d) { return d.depthWidth; });
 
 
       // Update the links…
@@ -368,7 +400,7 @@ assign(Markmap.prototype, {
           .attr('stroke', function(d) { return color(d.target.branch); })
           .attr('stroke-width', function(l) {return linkWidth(l.target);})
           .attr("d", function(d) {
-            var o = {x: source.x0, y: source.y0 + state.nodeWidth};
+            var o = {x: source.x0, y: source.y0 + d.source.depthWidth};
             return linkShape({source: o, target: o});
           });
 
@@ -376,7 +408,7 @@ assign(Markmap.prototype, {
       link.transition()
           .duration(state.duration)
           .attr("d", function(d) {
-            var s = {x: d.source.x, y: d.source.y + state.nodeWidth};
+            var s = {x: d.source.x, y: d.source.y + d.source.depthWidth};
             var t = {x: d.target.x, y: d.target.y};
             return linkShape({source: s, target: t});
           });
@@ -385,7 +417,7 @@ assign(Markmap.prototype, {
       link.exit().transition()
           .duration(state.duration)
           .attr("d", function(d) {
-            var o = {x: source.x, y: source.y + state.nodeWidth};
+            var o = {x: source.x, y: source.y + d.source.depthWidth};
             return linkShape({source: o, target: o});
           })
           .remove();
