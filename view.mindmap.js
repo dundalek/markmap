@@ -38,15 +38,24 @@ function traverseBranchId(node, branch, state) {
 
 function traverseDummyNodes(node) {
   if (node.children) {
-    node.children.forEach(function(n) {
-      traverseDummyNodes(n);
-    });
+    node.children.forEach(traverseDummyNodes);
 
     node.children = [{
       name: '',
       dummy: true,
       children: node.children
     }];
+  }
+}
+
+function traverseTruncateLabels(node, length) {
+  if (node.name.length > length) {
+    node.name = node.name.slice(0, length - 1) + '\u2026';
+  }
+  if (node.children) {
+    node.children.forEach(function(n) {
+      traverseTruncateLabels(n, length);
+    });
   }
 }
 
@@ -61,6 +70,7 @@ var defaultPreset = {
   nodePadding: 12,
   spacingVertical: 5,
   spacingHorizontal: 60,
+  truncateLabels: 0,
   duration: 750,
   layout: 'tree',
   color: 'gray',
@@ -184,6 +194,10 @@ assign(Markmap.prototype, {
   },
   setData: function(data) {
     var state = this.state;
+
+    if (state.truncateLabels) {
+      traverseTruncateLabels(data, state.truncateLabels);
+    }
 
     if (data.children) {
       data.children.forEach(function(d, i) {
