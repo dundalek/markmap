@@ -24,8 +24,7 @@ var assign = Object.assign || function(dst, src) {
 };
 
 function getLabelWidth(d) {
-  // 5 per character and 25 bonus for rounded corner
-  return d.name.length * 5 + 25;
+  return d.name.length * 5;
 }
 
 function traverseBranchId(node, branch, state) {
@@ -59,6 +58,7 @@ function Markmap(svg, data, options) {
 var defaultPreset = {
   nodeHeight: 20,
   nodeWidth: 180,
+  nodePadding: 12,
   spacingVertical: 5,
   spacingHorizontal: 60,
   duration: 750,
@@ -83,7 +83,8 @@ assign(Markmap.prototype, {
     'colorful': assign(assign({}, defaultPreset), {
       nodeHeight: 10,
       renderer: 'basic',
-      color: 'category20'
+      color: 'category20',
+      nodePadding: 6
     })
   },
   helperNames: ['layout', 'linkShape', 'color'],
@@ -92,7 +93,12 @@ assign(Markmap.prototype, {
       return d3.layout.flextree()
         .setNodeSizes(true)
         .nodeSize(function(d) {
-          return [self.state.nodeHeight, d.dummy ? self.state.spacingHorizontal : getLabelWidth(d)]
+          var width = d.dummy ? self.state.spacingHorizontal : getLabelWidth(d);
+          if (!d.dummy && width > 0) {
+            // Add padding non-empty nodes
+            width += 2 * self.state.nodePadding;
+          }
+          return [self.state.nodeHeight, width];
         })
         .spacing(function(a, b) {
           return a.parent == b.parent ? self.state.spacingVertical : self.state.spacingVertical*2;
@@ -216,8 +222,10 @@ assign(Markmap.prototype, {
   layout: function(state) {
     var layout = this.helpers.layout;
 
-    // Fill in with dummy nodes to handle spacing for layout algorithm
-    traverseDummyNodes(state.root);
+    if (state.linkShape !== 'bracket') {
+      // Fill in with dummy nodes to handle spacing for layout algorithm
+      traverseDummyNodes(state.root);
+    }
 
     // Compute the new tree layout.
     var nodes = layout.nodes(state.root).reverse();
@@ -232,6 +240,12 @@ assign(Markmap.prototype, {
         n.parent = n.parent.parent;
       }
     });
+
+    if (state.linkShape === 'bracket') {
+      nodes.forEach(function(n) {
+        n.y += n.depth * state.spacingHorizontal;
+      });
+    }
 
     var links = layout.links(nodes);
 
