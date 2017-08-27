@@ -23,57 +23,31 @@ var assign = Object.assign || function(dst, src) {
   return dst;
 };
 
-function traverseMinDistance(node) {
-  var val = Infinity;
-  if (node.children) {
-    val = Math.min.apply(null, node.children.map(traverseMinDistance));
-    if (node.children.length > 1) {
-      val = Math.min(val, Math.abs(node.children[0].x - node.children[1].x));
-    }
-  }
-  return val;
-}
-
 function getLabelWidth(d) {
   // 5 per character and 25 bonus for rounded corner
   return d.name.length * 5 + 25;
 }
 
-function traverseLabelWidth(d, offset) {
-  d.y += offset;
-  if (d.name !== '' && d.children && d.children.length === 1 && d.children[0].name === '') {
-    var child = d.children[0];
-    offset += d.y + getLabelWidth(d) - child.y;
-    child.y += offset;
-    if (child.children) {
-      child.children.forEach(function(c) {
-        traverseLabelWidth(c, offset);
-      });
-    }
-  }
-}
-
-// Set depth width to all nodes
-function traverseBranchIdAndDepthWidth(node, branch, state) {
+function traverseBranchId(node, branch, state) {
   node.branch = branch;
-  node.depthWidth = state.depthMaxSize[node.depth];
   if (node.children) {
     node.children.forEach(function(d) {
-      traverseBranchIdAndDepthWidth(d, branch, state);
+      traverseBranchId(d, branch, state);
     });
   }
 }
 
-// Depth width = max width of nodes in depth
-function traverseDepthSize(node, state) {
-  var d = node.depth;
-  var s = getLabelWidth(node);
-  state.depthMaxSize[d] = Math.max(state.depthMaxSize[d] || 0, s);
-
+function traverseDummyNodes(node) {
   if (node.children) {
     node.children.forEach(function(n) {
-      traverseDepthSize(n, state);
+      traverseDummyNodes(n);
     });
+
+    node.children = [{
+      name: '',
+      dummy: true,
+      children: node.children
+    }];
   }
 }
 
@@ -85,8 +59,8 @@ function Markmap(svg, data, options) {
 var defaultPreset = {
   nodeHeight: 20,
   nodeWidth: 180,
-  spacingVertical: 10,
-  spacingHorizontal: 120,
+  spacingVertical: 5,
+  spacingHorizontal: 60,
   duration: 750,
   layout: 'tree',
   color: 'gray',
@@ -114,8 +88,15 @@ assign(Markmap.prototype, {
   },
   helperNames: ['layout', 'linkShape', 'color'],
   layouts: {
-    tree: function() {
-      return d3.layout.tree();
+    tree: function(self) {
+      return d3.layout.flextree()
+        .setNodeSizes(true)
+        .nodeSize(function(d) {
+          return [self.state.nodeHeight, d.dummy ? self.state.spacingHorizontal : getLabelWidth(d)]
+        })
+        .spacing(function(a, b) {
+          return a.parent == b.parent ? self.state.spacingVertical : self.state.spacingVertical*2;
+        })
     }
   },
   linkShapes: {
@@ -189,7 +170,7 @@ assign(Markmap.prototype, {
     var helpers = this.helpers;
     this.helperNames.forEach(function(h) {
       if (!helpers[h] || (values[h] && values[h] !== state[h])) {
-        helpers[h] = this[h+'s'][values[h] || state[h]]();
+        helpers[h] = this[h+'s'][values[h] || state[h]](this);
       }
     }.bind(this));
     assign(state, values || {});
@@ -197,12 +178,10 @@ assign(Markmap.prototype, {
   },
   setData: function(data) {
     var state = this.state;
-    traverseDepthSize(data, state);
 
-    data.depthWidth = state.depthMaxSize[data.depth];
     if (data.children) {
       data.children.forEach(function(d, i) {
-        traverseBranchIdAndDepthWidth(d, i, state);
+        traverseBranchId(d, i, state);
       });
     }
 
@@ -211,14 +190,6 @@ assign(Markmap.prototype, {
     state.root.x0 = state.height / 2;
     state.root.y0 = 0;
 
-    // function collapse(d) {
-    //   if (d.children) {
-    //     d._children = d.children;
-    //     d._children.forEach(collapse);
-    //     d.children = null;
-    //   }
-    // }
-    //root.children.forEach(collapse);
     return this;
   },
   update: function(source) {
@@ -229,9 +200,9 @@ assign(Markmap.prototype, {
       var minX = d3.min(res.nodes, function(d) {return d.x;});
       var minY = d3.min(res.nodes, function(d) {return d.y;});
       var maxX = d3.max(res.nodes, function(d) {return d.x;});
-      var maxY = d3.max(res.nodes, function(d) {return d.y;});
+      var maxY = d3.max(res.nodes, function(d) {return d.y + d.y_size;});
       var realHeight = maxX - minX;
-      var realWidth = maxY - minY + state.nodeWidth;
+      var realWidth = maxY - minY;
       var scale = Math.min(state.height / realHeight, state.width / realWidth, 1);
       var translate = [
         (state.width-realWidth*scale)/2-minY*scale,
@@ -245,30 +216,24 @@ assign(Markmap.prototype, {
   layout: function(state) {
     var layout = this.helpers.layout;
 
-    var offset = state.root.x !== undefined ? state.root.x : state.root.x0;
+    // Fill in with dummy nodes to handle spacing for layout algorithm
+    traverseDummyNodes(state.root);
 
     // Compute the new tree layout.
-    var nodes = layout.nodes(state.root).reverse(),
-        links = layout.links(nodes);
+    var nodes = layout.nodes(state.root).reverse();
 
-    // Normalize
-    var ratio = (state.nodeHeight + state.spacingVertical) / traverseMinDistance(state.root);
-    offset -= state.root.x * ratio;
-
-    for (d in state.depthMaxSize) {
-      var y = 0;
-      for (var i = 1; i < parseInt(d); i++) {
-        y += state.depthMaxSize[i] + state.spacingHorizontal;
+    // Remove dummy nodes after layout is computed
+    nodes = nodes.filter(function(n) { return !n.dummy; });
+    nodes.forEach(function(n) {
+      if (n.children && n.children.length === 1 && n.children[0].dummy) {
+        n.children = n.children[0].children;
       }
-      state.yByDepth[d] = y;
-    }
-
-    nodes.forEach(function(d) {
-      d.y = state.yByDepth[parseInt(d.depth)+1];
-      d.x = d.x * ratio + offset;
+      if (n.parent && n.parent.dummy) {
+        n.parent = n.parent.parent;
+      }
     });
 
-    //traverseLabelWidth(root, 0);
+    var links = layout.links(nodes);
 
     return {
       nodes: nodes,
@@ -322,27 +287,27 @@ assign(Markmap.prototype, {
       // Enter any new nodes at the parent's previous position.
       var nodeEnter = node.enter().append("g")
           .attr("class", "markmap-node")
-          .attr("transform", function(d) { return "translate(" + (source.y0 + source.depthWidth - d.depthWidth) + "," + source.x0 + ")"; })
+          .attr("transform", function(d) { return "translate(" + (source.y0 + source.y_size - d.y_size) + "," + source.x0 + ")"; })
           .on("click", this.click.bind(this));
 
       nodeEnter.append('rect')
         .attr('class', 'markmap-node-rect')
         .attr("y", function(d) { return -linkWidth(d) / 2 })
-        .attr('x', function(d) { return d.depthWidth; })
+        .attr('x', function(d) { return d.y_size; })
         .attr('width', 0)
         .attr('height', linkWidth)
         .attr('fill', function(d) { return color(d.branch); });
 
       nodeEnter.append("circle")
           .attr('class', 'markmap-node-circle')
-          .attr('cx', function(d) { return d.depthWidth; })
+          .attr('cx', function(d) { return d.y_size; })
           .attr('stroke', function(d) { return color(d.branch); })
           .attr("r", 1e-6)
           .style("fill", function(d) { return d._children ? color(d.branch) : ''; });
 
       nodeEnter.append("text")
           .attr('class', 'markmap-node-text')
-          .attr("x", function(d) { return d.depthWidth; })
+          .attr("x", function(d) { return d.y_size; })
           .attr("dy", "-5")
           .attr("text-anchor", function(d) { return "start"; })
           .text(function(d) { return d.name; })
@@ -355,10 +320,7 @@ assign(Markmap.prototype, {
 
       nodeUpdate.select('rect')
         .attr('x', -1)
-        .attr('width', function(d) {
-          // Make small length node has enough width
-          return (d.children || d._children) ? d.depthWidth + 2 : getLabelWidth(d);
-        });
+        .attr('width', function(d) { return d.y_size + 2; });
 
       nodeUpdate.select("circle")
           .attr("r", 4.5)
@@ -375,11 +337,11 @@ assign(Markmap.prototype, {
       // Transition exiting nodes to the parent's new position.
       var nodeExit = node.exit().transition()
           .duration(state.duration)
-          .attr("transform", function(d) { return "translate(" + (source.y + source.depthWidth - d.depthWidth) + "," + source.x + ")"; })
+          .attr("transform", function(d) { return "translate(" + (source.y + source.y_size - d.y_size) + "," + source.x + ")"; })
           .remove();
 
       nodeExit.select('rect')
-        .attr('x', function(d) { return d.depthWidth; })
+        .attr('x', function(d) { return d.y_size; })
         .attr('width', 0);
 
       nodeExit.select("circle")
@@ -387,7 +349,7 @@ assign(Markmap.prototype, {
 
       nodeExit.select("text")
           .style("fill-opacity", 1e-6)
-          .attr("x", function(d) { return d.depthWidth; });
+          .attr("x", function(d) { return d.y_size; });
 
 
       // Update the links…
@@ -400,7 +362,7 @@ assign(Markmap.prototype, {
           .attr('stroke', function(d) { return color(d.target.branch); })
           .attr('stroke-width', function(l) {return linkWidth(l.target);})
           .attr("d", function(d) {
-            var o = {x: source.x0, y: source.y0 + source.depthWidth};
+            var o = {x: source.x0, y: source.y0 + source.y_size};
             return linkShape({source: o, target: o});
           });
 
@@ -408,7 +370,7 @@ assign(Markmap.prototype, {
       link.transition()
           .duration(state.duration)
           .attr("d", function(d) {
-            var s = {x: d.source.x, y: d.source.y + d.source.depthWidth};
+            var s = {x: d.source.x, y: d.source.y + d.source.y_size};
             var t = {x: d.target.x, y: d.target.y};
             return linkShape({source: s, target: t});
           });
@@ -417,7 +379,7 @@ assign(Markmap.prototype, {
       link.exit().transition()
           .duration(state.duration)
           .attr("d", function(d) {
-            var o = {x: source.x, y: source.y + source.depthWidth};
+            var o = {x: source.x, y: source.y + source.y_size};
             return linkShape({source: o, target: o});
           })
           .remove();
