@@ -1,4 +1,17 @@
-(function() {
+(function (root, factory) {
+    if (typeof define === 'function' && define.amd) {
+        // AMD. Register as an anonymous module.
+        define(['d3'], factory);
+    } else if (typeof exports === 'object') {
+        // Node. Does not work with strict CommonJS, but
+        // only CommonJS-like environments that support module.exports,
+        // like Node.
+        module.exports = factory(require('d3'));
+    } else {
+        // Browser globals (root is window)
+        root.markmap = factory(root.d3);
+    }
+}(this, function (d3) {
 
 // Node-link tree diagram using the Reingold-Tilford "tidy" algorithm,
 // as improved by A.J. van der Ploeg, 2013, "Drawing Non-layered Tidy
@@ -414,4 +427,4 @@ function d3_layout_hierarchyLinks(nodes) {
 }
 
 
-})();
+}));
