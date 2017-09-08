@@ -24,7 +24,9 @@ var assign = Object.assign || function(dst, src) {
 };
 
 function getLabelWidth(d) {
-  return d.name.length * 5;
+  return d.name.split('').reduce(function(w, c) {
+    return w + (c.toUpperCase() === c ? 6.5 : 5);
+  }, 0);
 }
 
 function traverseBranchId(node, branch, state) {
