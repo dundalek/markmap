@@ -124,3 +124,26 @@ it('parses definition lists', () => {
     }
   ]);
 });
+
+it('parses numbered lists', () => {
+  expect(parse("# h1\n1. a\n2. b")).toEqual([
+    {
+      "depth": 1,
+      "line": 0,
+      "name": "h1"
+    }, {
+      "autoCollapse": true,
+      "depth": 2,
+      "line": 1,
+      "name": ""
+    }, {
+      "depth": 3,
+      "line": 1,
+      "name": "a"
+    }, {
+      "depth": 3,
+      "line": 2,
+      "name": "b"
+    }
+  ]);
+});

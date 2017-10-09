@@ -24,6 +24,7 @@ module.exports = function parseMarkdown(text, options) {
       switch (tokens[i].type) {
         case 'bullet_list_open':
         case 'dl_open':
+        case 'ordered_list_open':
           headings.push({
             depth: depth + 1,
             line: tokens[i].lines[0],
@@ -34,6 +35,7 @@ module.exports = function parseMarkdown(text, options) {
           break;
         case 'bullet_list_close':
         case 'dl_close':
+        case 'ordered_list_close':
           depth -= 2;
           break;
         case 'list_item_open':
