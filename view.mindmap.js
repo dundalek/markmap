@@ -23,10 +23,13 @@ var assign = Object.assign || function(dst, src) {
   return dst;
 };
 
-function getLabelWidth(d) {
-  return d.name.split('').reduce(function(w, c) {
-    return w + (c.toUpperCase() === c ? 6.5 : 5);
-  }, 0);
+function getTextWidth(text, font) {
+  // re-use canvas object for better performance
+  var canvas = getTextWidth.canvas || (getTextWidth.canvas = document.createElement("canvas"));
+  var context = canvas.getContext("2d");
+  context.font = font;
+  var metrics = context.measureText(text);
+  return metrics.width;
 }
 
 function traverseBranchId(node, branch, state) {
@@ -87,7 +90,8 @@ assign(Markmap.prototype, {
       zoomTranslate: [0, 0],
       autoFit: true,
       depthMaxSize: {},
-      yByDepth: {}
+      yByDepth: {},
+      nodeFont: '10px sans-serif'
     };
   },
   presets: {
@@ -105,7 +109,7 @@ assign(Markmap.prototype, {
       return d3.layout.flextree()
         .setNodeSizes(true)
         .nodeSize(function(d) {
-          var width = d.dummy ? self.state.spacingHorizontal : getLabelWidth(d);
+          var width = d.dummy ? self.state.spacingHorizontal : getTextWidth(d.name, self.state.nodeFont);
           if (!d.dummy && width > 0) {
             // Add padding non-empty nodes
             width += 2 * self.state.nodePadding;
