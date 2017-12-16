@@ -1,4 +1,4 @@
-var parse = require('../parse.markdown');
+var parse = require('../src/parse.markdown');
 
 it('parses headings', () => {
   expect(parse("# a\n## b")).toEqual([

@@ -1,5 +1,5 @@
-var parse = require('../parse.markdown');
-var transform = require('../transform.headings');
+var parse = require('../src/parse.markdown');
+var transform = require('../src/transform.headings');
 
 it('auto-collapses single element root', () => {
   expect(transform(parse('# a'))).toEqual({"depth": 1, "line": 0, "name": "a"});
