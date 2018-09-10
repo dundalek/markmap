@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<head>
+  <meta charset="utf-8">
+  <link rel="stylesheet" href="../../style/view.mindmap.css">
+  <style>
+    html {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+    }
+
+    body {
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      right: 0;
+      left: 0;
+    }
+
+    svg#mindmap {
+      width: 100%;
+      height: 100%;
+    }
+  </style>
+</head>
+<body>
+  <svg id="mindmap"></svg>
+
+  <script src="../../node_modules/d3/d3.js"></script>
+  <script src="../../src/d3-flextree.js"></script>
+  <script src="../../src/view.mindmap.js"></script>
+  <script>
+    d3.json("../data/tree.json", function(error, data) {
+      if (error) throw error;
+
+      markmap('svg#mindmap', data, {
+        preset: 'colorful', // or default
+        linkShape: 'diagonal' // or bracket
+      });
+    });
+  </script>
+</body>

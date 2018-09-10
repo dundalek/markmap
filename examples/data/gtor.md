@@ -1743,66 +1743,7 @@ and estimated time to completion and status signals require further explanation.
 These ideas need to be incorporated into the sketches of promise and task
 implementations.
 
-## Glossary
-
--   accumulator
--   array
--   asynchronous
--   await
--   behavior
--   blocking
--   broadcast
--   buffer
--   cancelable
--   continuous
--   control
--   counter
--   deferred
--   discrete
--   flow gauge
--   future
--   gauge
--   getter
--   getter getter
--   iterable
--   iterator
--   multiple
--   non-blocking
--   observable
--   observer
--   operation
--   poll
--   pressure
--   probe
--   promise
--   publisher
--   pull
--   pulse
--   push
--   readable
--   result
--   retriable
--   sensor
--   setter
--   setter setter
--   signal
--   single
--   sink
--   spatial
--   stream
--   strobe
--   subscriber
--   synchronous
--   task
--   temporal
--   throttle
--   unicast
--   value
--   writable
--   yield
-
 ## Acknowledgements
 
 I am grateful to Domenic Denicola, Ryan Paul, and Kevin Smith for reviewing and
 providing feedback on various drafts of this article.
-
