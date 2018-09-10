@@ -36,6 +36,14 @@ See the file [example.parse.js](examples/example.parse.js) in the examples folde
 
 See the file [example.view.js](examples/example.view.js) in the examples folder to see how to render a mindmap.
 
+## Changelog
+
+### [0.5.0](https://github.com/dundalek/closh/compare/v0.4.2...v0.5.0) (2018-09-10)
+
+- **Breaking change**: Changed structure of source files
+- Added support for parsing inter file links for markdown
+- Updated code examples
+
 ## License
 
 The MIT License.
