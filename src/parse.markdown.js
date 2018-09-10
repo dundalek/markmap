@@ -30,7 +30,7 @@ function extractLinks(tokens) {
 module.exports = function parseMarkdown(text, options) {
   options = options || {};
   parseLists = options.lists !== false;
-  parseLinks = options.links !== false;
+  parseLinks = Boolean(options.links);
 
   var Remarkable = require('remarkable');
   var md = new Remarkable();
@@ -77,11 +77,23 @@ module.exports = function parseMarkdown(text, options) {
           depth -= 2;
           break;
         case 'list_item_open':
-          headings.push({
+          var content = (tokens[i+2].children || [])
+            .filter(function(x) { return x.type === "text" })
+            .map(function(x) { return x.content || "" })
+            .join('')
+            .split('\n')[0];
+          var heading = {
             depth: depth,
             line: tokens[i].lines[0],
-            name: (tokens[i+2].content || '').split('\n')[0]
-          });
+            name: content
+          };
+          if (parseLinks) {
+            var childLink = parseMarkdown(tokens[i+2].content || '', options)[0];
+            if (childLink) {
+              heading.href = childLink.href;
+            }
+          }
+          headings.push(heading);
           i += 2;
           break;
         case 'dt_open':

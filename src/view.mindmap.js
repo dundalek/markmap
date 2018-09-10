@@ -360,7 +360,7 @@ assign(Markmap.prototype, {
           .attr("r", 4.5)
           .style("fill", function(d) { return d._children ? color(d.branch) : ''; })
           .style('display', function(d) {
-            var hasChildren = d.children || d._children;
+            var hasChildren = d.href || d.children || d._children;
             return hasChildren ?  'inline' : 'none';
           });
 

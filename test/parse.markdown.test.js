@@ -147,3 +147,92 @@ it('parses numbered lists', () => {
     }
   ]);
 });
+
+it('parses links', () => {
+  expect(parse("# h1\nx [x1](./a.md) y [x2](./b.md) [x3](./c.md)", { links: true })).toEqual([
+    {
+      "depth": 1,
+      "line": 0,
+      "name": "h1"
+    }, {
+      "depth": 2,
+      "line": 1,
+      "name": "x1",
+      "href": "./a.md"
+    }, {
+      "depth": 2,
+      "line": 1,
+      "name": "x2",
+      "href": "./b.md"
+    }, {
+      "depth": 2,
+      "line": 1,
+      "name": "x3",
+      "href": "./c.md"
+    }
+  ]);
+});
+
+it('parses links inside lists', () => {
+  expect(parse("# h1\n- x\n- [aaa](./a.md)\n- x [bbb](./b.md) y", { links: true })).toEqual([
+    {
+      "depth": 1,
+      "line": 0,
+      "name": "h1"
+    },
+    {
+      "autoCollapse": true,
+      "depth": 2,
+      "line": 1,
+      "name": ""
+    },
+    {
+      "depth": 3,
+      "line": 1,
+      "name": "x",
+    },
+    {
+      "depth": 3,
+      "line": 2,
+      "name": "aaa",
+      "href": "./a.md"
+    },
+    {
+      "depth": 3,
+      "line": 3,
+      "name": "x bbb y",
+      "href": "./b.md"
+    },
+  ]);
+});
+
+it('doest not parse links inside lists when disabled by default', () => {
+  expect(parse("# h1\n- x\n- [aaa](./a.md)\n- x [bbb](./b.md) y")).toEqual([
+    {
+      "depth": 1,
+      "line": 0,
+      "name": "h1"
+    },
+    {
+      "autoCollapse": true,
+      "depth": 2,
+      "line": 1,
+      "name": ""
+    },
+    {
+      "depth": 3,
+      "line": 1,
+      "name": "x",
+    },
+    {
+      "depth": 3,
+      "line": 2,
+      "name": "aaa",
+    },
+    {
+      "depth": 3,
+      "line": 3,
+      "name": "x bbb y",
+    },
+  ]);
+});
