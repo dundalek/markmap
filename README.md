@@ -14,11 +14,17 @@
 - Pan around by dragging the backgroud.
 - Expand/collapse children of a node by clicking on the circle.
 
+Supported formats:
+- Markdown
+- MindMup
+- Txtmap (whitespace indented plaintext)
+- Pandoc (limited prototype)
+
 Suggestions for new featues are welcome, feel free to open an [issue](https://github.com/dundalek/markmap/issues).
 
 ## How to use
 
-Install the component with NPM.
+Install the component with NPM:
 ```
 npm install markmap
 ```
@@ -28,13 +34,25 @@ Visualizing a markdown text consists of two steps:
 1. The text is parsed and transformed into a tree representation.
 2. The tree is rendered.
 
-### Parsing
+### Rendering examples
 
-See the file [example.parse.js](examples/example.parse.js) in the examples folder to see how to use the parser.
+Mindmaps are rendered in the browser. To open the [example](examples/browser/example.html) you need to first start HTTP server.
 
-### Rendering
+If you have python installed you can for example run to start the HTTP server:
+```sh
+python -m SimpleHTTPServer 3000
+```
 
-See the file [example.view.js](examples/example.view.js) in the examples folder to see how to render a mindmap.
+Then open http://localhost:3000/examples/browser/example.html in a web browser.
+
+### Parsing examples
+
+Parsing different formats can be done in node.js, there are various [examples](examples/node) available. To run the markdown example:
+
+```sh
+cd examples/node
+node example.parse.markdown.js
+```
 
 ## Changelog
 
