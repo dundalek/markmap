@@ -56,7 +56,7 @@ node example.parse.markdown.js
 
 ## Changelog
 
-### [0.5.0](https://github.com/dundalek/closh/compare/v0.4.2...v0.5.0) (2018-09-10)
+### [0.5.0](https://github.com/dundalek/markmap/compare/v0.4.2...v0.5.0) (2018-09-10)
 
 - **Breaking change**: Changed structure of source files
 - Added support for parsing inter file links for markdown
