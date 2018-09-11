@@ -211,12 +211,33 @@ assign(Markmap.prototype, {
       });
     }
 
+    if (state.root) {
+      this.diffTreeState(data, state.root);
+    }
+
     var state = this.state;
     state.root = data;
     state.root.x0 = state.height / 2;
     state.root.y0 = 0;
 
     return this;
+  },
+  diffTreeState: function(next, prev) {
+    var childrenNext = next.children;
+    var childrenPrev = prev.children || prev._children;
+
+    if (childrenNext && childrenPrev) {
+      for (var k = 0; k < childrenNext.length; k += 1) {
+        if (childrenPrev[k]) {
+          this.diffTreeState(childrenNext[k], childrenPrev[k]);
+        }
+      }
+
+      if (prev._children) {
+        next._children = next.children;
+        delete next.children;
+      }
+    }
   },
   update: function(source) {
     var state = this.state;
