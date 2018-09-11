@@ -110,6 +110,32 @@ it('parses lists under headings', () => {
   ]);
 });
 
+it('handles empty list items', () => {
+  expect(parse("- a\n-\n- c")).toEqual([
+    {
+      "autoCollapse": true,
+      "depth": 1,
+      "line": 0,
+      "name": "",
+    },
+    {
+      "depth": 2,
+      "line": 0,
+      "name": "a",
+    },
+    {
+      "depth": 2,
+      "line": 1,
+      "name": "",
+    },
+    {
+      "depth": 2,
+      "line": 2,
+      "name": "c",
+    },
+  ]);
+});
+
 it('parses definition lists', () => {
   expect(parse("a\n: text")).toEqual([
     {

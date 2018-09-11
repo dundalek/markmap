@@ -77,24 +77,29 @@ module.exports = function parseMarkdown(text, options) {
           depth -= 2;
           break;
         case 'list_item_open':
-          var content = (tokens[i+2].children || [])
-            .filter(function(x) { return x.type === "text" })
-            .map(function(x) { return x.content || "" })
-            .join('')
-            .split('\n')[0];
           var heading = {
             depth: depth,
             line: tokens[i].lines[0],
-            name: content
           };
-          if (parseLinks) {
-            var childLink = parseMarkdown(tokens[i+2].content || '', options)[0];
-            if (childLink) {
-              heading.href = childLink.href;
+          if (tokens[i+1].type === "list_item_close") {
+            heading.name = "";
+            i += 1;
+          } else {
+            heading.name = (tokens[i+2].children || [])
+              .filter(function(x) { return x.type === "text" })
+              .map(function(x) { return x.content || "" })
+              .join('')
+              .split('\n')[0];
+
+            if (parseLinks) {
+              var childLink = parseMarkdown(tokens[i+2].content || '', options)[0];
+              if (childLink) {
+                heading.href = childLink.href;
+              }
             }
+            i += 2;
           }
           headings.push(heading);
-          i += 2;
           break;
         case 'dt_open':
           headings.push({
