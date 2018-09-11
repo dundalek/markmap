@@ -227,9 +227,31 @@ assign(Markmap.prototype, {
     var childrenPrev = prev.children || prev._children;
 
     if (childrenNext && childrenPrev) {
+      // if number of children is different (nodes we likely added or removed) we create a name based index
+      // else we use position based comparison as nodes were likely just renamed
+      var idx;
+      if (childrenNext.length !== childrenPrev.length) {
+        idx = childrenPrev.reduce(function(res, node) {
+          res[node.name] = res[node.name] || [];
+          res[node.name].push(node);
+          return res;
+        }, {});
+      }
+
       for (var k = 0; k < childrenNext.length; k += 1) {
-        if (childrenPrev[k]) {
-          this.diffTreeState(childrenNext[k], childrenPrev[k]);
+        var child;
+        if (idx) {
+          var nodes = idx[childrenNext[k].name];
+          if (nodes) {
+            child = nodes[0];
+            idx[childrenNext[k].name] = nodes.slice(1);
+          }
+        } else {
+          child = childrenPrev[k];
+        }
+
+        if (child) {
+          this.diffTreeState(childrenNext[k], child);
         }
       }
 
