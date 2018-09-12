@@ -33,7 +33,9 @@ function getTextWidth(text, font) {
 }
 
 function traverseBranchId(node, branch, state) {
-  node.branch = branch;
+  if (!("branch" in node)) {
+    node.branch = branch;
+  }
   if (node.children) {
     node.children.forEach(function(d) {
       traverseBranchId(d, branch, state);
@@ -198,7 +200,7 @@ assign(Markmap.prototype, {
     assign(state, values || {});
     return this;
   },
-  setData: function(data) {
+  preprocessData(data, prev) {
     var state = this.state;
 
     if (state.truncateLabels) {
@@ -211,11 +213,15 @@ assign(Markmap.prototype, {
       });
     }
 
+    this.diffTreeState(data, prev);
+  },
+  setData: function(data) {
+    var state = this.state;
+
     if (state.root) {
-      this.diffTreeState(data, state.root);
+      this.preprocessData(data, state.root);
     }
 
-    var state = this.state;
     state.root = data;
     state.root.x0 = state.height / 2;
     state.root.y0 = 0;
