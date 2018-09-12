@@ -213,14 +213,14 @@ assign(Markmap.prototype, {
       });
     }
 
-    this.diffTreeState(data, prev);
+    if (prev) {
+      this.diffTreeState(data, prev);
+    }
   },
   setData: function(data) {
     var state = this.state;
 
-    if (state.root) {
-      this.preprocessData(data, state.root);
-    }
+    this.preprocessData(data, state.root);
 
     state.root = data;
     state.root.x0 = state.height / 2;
