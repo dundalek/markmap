@@ -1,8 +1,8 @@
 const d3 = require('d3');
-require('../../src/d3-flextree');
-const markmap = require('../../src/view.mindmap');
-const parse = require('../../src/parse.markdown');
-const transform = require('../../src/transform.headings');
+require('../../lib/d3-flextree');
+const markmap = require('../../lib/view.mindmap');
+const parse = require('../../lib/parse.markdown');
+const transform = require('../../lib/transform.headings');
 
 d3.text("data/gtor.md", function(error, text) {
   if (error) throw error;

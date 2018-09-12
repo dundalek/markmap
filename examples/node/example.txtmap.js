@@ -1,6 +1,6 @@
 var fs = require('fs');
-var parse = require('../../src/parse.txtmap');
-var transform = require('../../src/transform.headings');
+var parse = require('../../lib/parse.txtmap');
+var transform = require('../../lib/transform.headings');
 
 var text = fs.readFileSync('../data/example.txtmap', 'utf-8');
 

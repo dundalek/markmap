@@ -1,5 +1,5 @@
 var fs = require('fs');
-var transform = require('../../src/transform.mindmup');
+var transform = require('../../lib/transform.mindmup');
 
 var text = fs.readFileSync('../data/MindMapping.mup', 'utf-8');
 

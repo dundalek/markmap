@@ -1,7 +1,7 @@
 const d3 = require('d3');
-require('../../src/d3-flextree');
-const markmap = require('../../src/view.mindmap');
-const transform = require('../../src/transform.mindmup');
+require('../../lib/d3-flextree');
+const markmap = require('../../lib/view.mindmap');
+const transform = require('../../lib/transform.mindmup');
 
 d3.json("data/MindMapping.mup", function(error, data) {
   if (error) throw error;

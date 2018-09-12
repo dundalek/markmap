@@ -1,6 +1,6 @@
 const d3 = require('d3');
-require('../../src/d3-flextree');
-const markmap = require('../../src/view.mindmap');
+require('../../lib/d3-flextree');
+const markmap = require('../../lib/view.mindmap');
 
 d3.json("data/flare.json", function(error, data) {
   if (error) throw error;

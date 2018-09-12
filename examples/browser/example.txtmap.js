@@ -1,9 +1,9 @@
 const d3 = require('d3');
-require('../../src/d3-flextree');
-const markmap = require('../../src/view.mindmap');
-// const parse = require('../../src/parse.markdown');
-const parse = require('../../src/parse.txtmap');
-const transform = require('../../src/transform.headings');
+require('../../lib/d3-flextree');
+const markmap = require('../../lib/view.mindmap');
+// const parse = require('../../lib/parse.markdown');
+const parse = require('../../lib/parse.txtmap');
+const transform = require('../../lib/transform.headings');
 
 // d3.json("data/tree.json", function(error, data) {
 //   if (error) throw error;
