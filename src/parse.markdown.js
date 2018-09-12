@@ -1,3 +1,4 @@
+var Remarkable = require('remarkable');
 
 function extractLinks(tokens) {
   var result = [];
@@ -32,7 +33,6 @@ module.exports = function parseMarkdown(text, options) {
   parseLists = options.lists !== false;
   parseLinks = Boolean(options.links);
 
-  var Remarkable = require('remarkable');
   var md = new Remarkable();
   md.block.ruler.enable([
     'deflist'

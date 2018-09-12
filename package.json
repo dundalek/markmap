@@ -3,6 +3,7 @@
   "version": "0.5.0",
   "description": "Visualize markdown documents as mindmaps",
   "scripts": {
+    "start": "shx cp -r examples/data dist && parcel examples/browser/index.html --open",
     "test": "jest",
     "dev": "jest --watch --notify"
   },
@@ -23,6 +24,8 @@
     "remarkable": "^1.6.0"
   },
   "devDependencies": {
-    "jest": "^20.0.4"
+    "jest": "^20.0.4",
+    "parcel-bundler": "^1.9.7",
+    "shx": "^0.3.2"
   }
 }
