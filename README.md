@@ -36,24 +36,29 @@ Visualizing a markdown text consists of two steps:
 1. The text is parsed and transformed into a tree representation.
 2. The tree is rendered.
 
-### Rendering examples
+### Examples
 
-Mindmaps are rendered in the browser. To open the [example](examples/browser/example.html) you need to first start HTTP server.
+To run the examples first clone the project and install dependencies:
 
-If you have python installed you can for example run to start the HTTP server:
 ```sh
-python -m SimpleHTTPServer 3000
+git clone https://github.com/dundalek/markmap.git
+cd markmap
+npm install
 ```
 
-Then open http://localhost:3000/examples/browser/example.html in a web browser.
+In the examples code there are imports like `require('../../lib/somefile')`. When using this library in your project you need to change those to `require('markmap/lib/somefile')`.
 
-### Parsing examples
+#### Browser
 
-Parsing different formats can be done in node.js, there are various [examples](examples/node) available. To run the markdown example:
+Run `npm start` and a browser will open with the example page where you can see how different formats are parsed and displayed. The source code for browser examples is located in  [examples/browser](examples/browser) folder.
+
+#### Node.js
+
+Node examples are located in [examples/node](examples/node). You can run the markdown example or others as follows:
 
 ```sh
 cd examples/node
-node example.parse.markdown.js
+node example.markdown.js
 ```
 
 ## Changelog
