@@ -3,7 +3,8 @@
   "version": "0.5.0",
   "description": "Visualize markdown documents as mindmaps",
   "scripts": {
-    "start": "shx cp -r examples/data dist && parcel examples/browser/index.html --open",
+    "copy:examples": "shx cp -r examples/data dist",
+    "start": "npm run copy:examples && parcel examples/browser/index.html --open",
     "test": "jest",
     "dev": "jest --watch --notify"
   },
@@ -21,6 +22,7 @@
   "license": "MIT",
   "dependencies": {
     "d3": "^3.5.6",
+    "orga": "^0.5.3",
     "remarkable": "^1.6.0"
   },
   "devDependencies": {
