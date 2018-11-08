@@ -63,6 +63,13 @@ node example.markdown.js
 
 ## Changelog
 
+### [0.6.0](https://github.com/dundalek/markmap/compare/v0.5.0...v0.6.0) (2018-11-08)
+
+- **Breaking change**: Moved sources from src to lib. That way there will be no breakage if we happen to introduce babel in the future.
+- Added tree diffing heuristic
+- Added more code examples
+- Fixed link parsing issues
+
 ### [0.5.0](https://github.com/dundalek/markmap/compare/v0.4.2...v0.5.0) (2018-09-10)
 
 - **Breaking change**: Changed structure of source files
