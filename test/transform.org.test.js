@@ -1,5 +1,5 @@
 var parse = require('../lib/parse.org');
-var transform = require('../lib/transform.org');
+var transform = require('../lib/transform.headings');
 
 describe('auto collapse', () => {
 
