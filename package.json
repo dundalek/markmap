@@ -1,6 +1,6 @@
 {
   "name": "markmap",
-  "version": "0.5.0",
+  "version": "0.6.0",
   "description": "Visualize markdown documents as mindmaps",
   "scripts": {
     "start": "shx cp -r examples/data dist && parcel examples/browser/index.html --open",
