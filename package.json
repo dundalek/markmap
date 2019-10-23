@@ -21,7 +21,7 @@
   "license": "MIT",
   "dependencies": {
     "d3": "3.5.6",
-    "remarkable": "1.7.4"
+    "remarkable": "2.0.0"
   },
   "devDependencies": {
     "jest": "24.9.0",
