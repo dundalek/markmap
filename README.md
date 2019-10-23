@@ -63,6 +63,10 @@ node example.markdown.js
 
 ## Changelog
 
+### [0.6.1](https://github.com/dundalek/markmap/compare/v0.6.0...v0.6.1) (2019-10-23)
+
+- Bump dependencies to fix vulnerabilities
+
 ### [0.6.0](https://github.com/dundalek/markmap/compare/v0.5.0...v0.6.0) (2018-11-08)
 
 - **Breaking change**: Moved sources from src to lib. That way there will be no breakage if we happen to introduce babel in the future.
