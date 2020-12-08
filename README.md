@@ -13,7 +13,7 @@
 ## Features
 
 - Zoom in and out with the mouse wheel.
-- Pan around by dragging the backgroud.
+- Pan around by dragging the background.
 - Expand/collapse children of a node by clicking on the circle.
 
 Supported formats:
@@ -22,7 +22,7 @@ Supported formats:
 - Txtmap (whitespace indented plaintext)
 - Pandoc (limited prototype)
 
-Suggestions for new featues are welcome, feel free to open an [issue](https://github.com/dundalek/markmap/issues).
+Suggestions for new features are welcome, feel free to open an [issue](https://github.com/dundalek/markmap/issues).
 
 ## How to use
 
