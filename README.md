@@ -3,7 +3,11 @@
 
 [![Build status on CircleCI](https://circleci.com/gh/dundalek/markmap.svg?style=shield)](https://circleci.com/gh/dundalek/markmap) [![npm version](https://img.shields.io/npm/v/markmap.svg)](https://www.npmjs.com/package/markmap)
 
-*Markmap* is a javascript component that will visualize your markdown documents as mindmaps. It is useful for better navigation and overview of the content. You can see it in action online [here](http://kb.knomaton.org/multi-agent-systems/). It is also used in an [extension](https://atom.io/packages/markdown-mindmap) for Atom editor.
+*Markmap* is a javascript component that will visualize your markdown documents as mindmaps. It is useful for better navigation and overview of the content. You can see it in action online [here](http://kb.knomaton.org/multi-agent-systems/).
+
+It is used in:
+- Atom editor [extension](https://atom.io/packages/markdown-mindmap)
+- 3rd party desktop app [mdSilo](https://github.com/danloh/mdSilo-app)
 
 | ![markmap in action](doc/img/mindmap-screenshot2.png) | ![markmap in action](doc/img/mindmap-screenshot1.png) |
 |:-:|:-:|
